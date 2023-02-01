@@ -15,6 +15,12 @@ class CoupledStockfish:
             self.player = -1
         self.board = self.game.board()
 
+    def make_move(self, move, eval=False):
+        self.board.push(move)
+        self.stockfish_instance.make_moves_from_current_position([move.uci()])
+        if eval:
+            return self.stockfish_instance.get_evaluation()
+
     def run(self):
         #mline = [m.uci() for m in self.game.mainline_moves()]
         #print('SAN: '+str(self.game.mainline_moves()))
@@ -25,10 +31,8 @@ class CoupledStockfish:
         for i in range(len(mline)):
             m = mline[i]
             m_san = self.board.san(m)
-            self.board.push(m)
-            self.stockfish_instance.make_moves_from_current_position([m.uci()])
             if i%2 == self.player: # player turn
-                eval = self.stockfish_instance.get_evaluation()
+                eval = self.make_move(m, eval=True)
                 if eval['type']=='cp':
                     print(m_san+': '+str(eval['value'])+' centipawns')
                 elif eval['type']=='mate':
@@ -36,6 +40,8 @@ class CoupledStockfish:
                 else:
                     print('evaluation failed')
                 ## extract state here and eval position; add to database
+            else:
+                self.make_move(m)
         return self.board
 
     def get_sf_board(self):
