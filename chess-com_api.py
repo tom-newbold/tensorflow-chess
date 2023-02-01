@@ -12,8 +12,12 @@ while len(r) == 0:
         y -= 1
         m = 12
 j = r[-1]
-print(json.dumps(j, indent=4))
+#print(json.dumps(j, indent=4))
+file = open('game-from-api.pgn', 'w')
+file.write(j['pgn'])
+file.close()
 
-
-#import coupled_stockfish_engine as cse
-#sf = cse.CoupledStockfish('stockfish-test\\sample_game.pgn', 'The111thTom')
+import coupled_stockfish_engine as cse
+sf = cse.CoupledStockfish('game-from-api.pgn', 'The111thTom')
+b = sf.run()
+print(sf.get_sf_board())
