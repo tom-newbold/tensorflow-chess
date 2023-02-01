@@ -14,6 +14,9 @@ m = [] # array of moves
 for i in range(len(_moves)//3):
     m.append(_moves[i*3+1])
     m.append(_moves[i*3+2])
+print(' '.join(m))
+
+###
 
 move_pairs = [] # pairs move with response
 if player==1:
