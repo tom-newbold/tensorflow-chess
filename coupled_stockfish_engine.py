@@ -13,14 +13,37 @@ class CoupledStockfish:
             self.player = 1
         else:
             self.player = -1
+        self.board = self.game.board()
 
     def run(self):
-        b = self.game.board()
-        for m in self.game.mainline_moves():
-            b.push(m)
-        return b
+        #mline = [m.uci() for m in self.game.mainline_moves()]
+        #print('SAN: '+str(self.game.mainline_moves()))
+        mline = self.game.mainline_moves()
+        print('SAN: '+str(mline))
+        mline = list(mline)
+        # move, response = ['','']
+        for i in range(len(mline)):
+            m = mline[i]
+            m_san = self.board.san(m)
+            self.board.push(m)
+            self.stockfish_instance.make_moves_from_current_position([m.uci()])
+            if i%2 == self.player: # player turn
+                eval = self.stockfish_instance.get_evaluation()
+                if eval['type']=='cp':
+                    print(m_san+': '+str(eval['value'])+' centipawns')
+                elif eval['type']=='mate':
+                    print(m_san+': mate in '+str(eval['value']))
+                else:
+                    print('evaluation failed')
+        return self.board
+
+    def get_sf_board(self):
+        return self.stockfish_instance.get_board_visual()
 
 if __name__ == '__main__':
     sf = CoupledStockfish('stockfish-test\\sample_game.pgn', 'The111thTom')
-    print(sf.run().fen())
-    print(sf.player)
+    print('following player '+str(sf.player)+' (0:white;1:black)')
+    b = sf.run()
+    print(b.fen())
+    print(b.outcome())
+    print(sf.get_sf_board())
