@@ -4,6 +4,7 @@
 The intention behind this project is to find a way to extract useful *"state-decision"* data from my own chess game archive,
 and to develop a machine learning model using this to emulate my ability.
 
+Older games should be exponentially less impactful, under the assumption of a *"learning curve"*.
 
 #### Links
 - Tensorflow: <https://www.tensorflow.org/>
