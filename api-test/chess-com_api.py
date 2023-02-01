@@ -5,7 +5,7 @@ m = time.gmtime().tm_mon
 # fetch most recent game
 r = []
 while len(r) == 0:
-    request = requests.get('https://api.chess.com/pub/player/the111thtom/games/{year}/{month:02d}'.format(year=y,month=m))
+    request = requests.get('https://api.chess.com/pub/player/benw2349/games/{year}/{month:02d}'.format(year=y,month=m))
     r = request.json()['games']
     m -= 1
     if m==0:
@@ -18,6 +18,6 @@ file.write(j['pgn'])
 file.close()
 
 import coupled_stockfish_engine as cse
-sf = cse.CoupledStockfish('game-from-api.pgn', 'The111thTom')
+sf = cse.CoupledStockfish('game-from-api.pgn', 'benw2349')
 b = sf.run()
 print(sf.get_sf_board())
