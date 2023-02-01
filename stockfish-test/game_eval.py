@@ -10,3 +10,7 @@ moves = ''
 for k in range(13,len(out)):
     moves = moves + ' ' + out[k]
 print(moves)
+
+from stockfish import Stockfish as sf
+
+stockfish_instance = sf('stockfish_20011801_x64.exe')
