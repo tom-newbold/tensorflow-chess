@@ -1,5 +1,5 @@
 ## Emulating human chess intelligence
-#### using Tensorflow and Stockfish
+### using Tensorflow and Stockfish
 
 The intention behind this project is to find a way to extract useful *"state-decision"* data from my own chess game archive,
 and to develop a machine learning model using this to emulate my ability.
