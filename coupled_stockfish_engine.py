@@ -35,6 +35,7 @@ class CoupledStockfish:
                     print(m_san+': mate in '+str(eval['value']))
                 else:
                     print('evaluation failed')
+                ## extract state here and eval position; add to database
         return self.board
 
     def get_sf_board(self):
@@ -47,3 +48,5 @@ if __name__ == '__main__':
     print(b.fen())
     print(b.outcome())
     print(sf.get_sf_board())
+    # TODO: import more games from chess.com api
+    #       or use separate files
