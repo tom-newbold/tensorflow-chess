@@ -11,8 +11,8 @@ and to develop a machine learning model using this to emulate my ability.
 - Python-Chess: <https://python-chess.readthedocs.io/en/latest/>
 
 APIs:
-- [chess.com]<https://www.chess.com/news/view/published-data-api>
-- [lichess.org]<https://lichess.org/api>
+- [chess.com](https://www.chess.com/news/view/published-data-api)
+- [lichess.org](https://lichess.org/api)
 
 #### Requires
 
