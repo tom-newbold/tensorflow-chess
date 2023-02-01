@@ -17,7 +17,7 @@ file = open('game-from-api.pgn', 'w')
 file.write(j['pgn'])
 file.close()
 
-import coupled_stockfish_engine as cse
+from . import coupled_stockfish_engine as cse
 sf = cse.CoupledStockfish('game-from-api.pgn', 'benw2349')
 b = sf.run()
 print(sf.get_sf_board())
