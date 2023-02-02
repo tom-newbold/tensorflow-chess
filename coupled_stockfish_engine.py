@@ -6,7 +6,7 @@ import chess.pgn as pgn
 class CoupledStockfish:
     def __init__(self, pgn_path, username):
         self.stockfish_instance = Stockfish(path=STOCKFISH_PATH)
-        self.game = pgn.read_game(open(pgn_path, encoding='utf-8')) # TODO: array for multiple games?
+        self.game = pgn.read_game(open(pgn_path, encoding='utf-8')) # TODO: array for multiple games? and regular json input variation
         if self.game.headers['White'] == username:
             self.player = 0
         elif self.game.headers['Black'] == username:
@@ -31,6 +31,7 @@ class CoupledStockfish:
             m = mline[i]
             m_san = self.board.san(m)
             if i%2 == self.player: # player turn
+                fen_context = self.board.fen()
                 eval = self.make_move(m, eval=True)
                 if eval['type']=='cp':
                     print(m_san+': '+str(eval['value'])+' centipawns')
@@ -39,7 +40,7 @@ class CoupledStockfish:
                 else:
                     print('evaluation failed')
                 out.append({
-                    'fen':self.board.fen(),
+                    'fen':fen_context,
                     'move':m_san,
                     'eval':eval
                 })
