@@ -16,7 +16,7 @@ while len(r) == 0:
 
 out_json = {'data_points':[]}
 for i in range(len(r)): # iterate over games from that month
-    j = r[-(1+i)]
+    j = r[i]
     with open('bin\\temp.pgn', 'w') as f:
         f.write(j['pgn'])
         f.close()
