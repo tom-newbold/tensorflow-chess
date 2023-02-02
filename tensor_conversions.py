@@ -17,12 +17,12 @@ def fen_to_tensor(fen_string):
                 x += val
             except ValueError:
                 val = map[piece.lower()]
-                array[x, y] = val if piece.islower() else -val
+                array[x, y] = val if piece.isupper() else -val
     #output = tf.Variable(tf.zeros([8, 8], tf.int32))
     output = tf.convert_to_tensor(array.transpose())
     return output
 
-#print(fen_to_tensor("r1bq2nr/2pk1Bpp/p4p2/np2p3/1P3P2/PQP1P2P/6P1/R1B1K1NR w KQ - 3 14"))
+print(fen_to_tensor("r1bq2nr/2pk1Bpp/p4p2/np2p3/1P3P2/PQP1P2P/6P1/R1B1K1NR w KQ - 3 14"))
 
 def tensor_to_lan(tensor):
     out = ''
