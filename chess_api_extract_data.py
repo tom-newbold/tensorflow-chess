@@ -15,6 +15,8 @@ while len(r) == 0:
 
 
 out_json = {'data_points':[]}
+reference_time = r[0]['end_time']
+time_range = r[-1]['end_time'] - reference_time
 for i in range(len(r)): # iterate over games from that month
     j = r[i]
     with open('bin\\temp.pgn', 'w') as f:
@@ -29,7 +31,8 @@ for i in range(len(r)): # iterate over games from that month
             'player': p,
             'fen': s['fen'],
             'following_move': s['move'],
-            'resulting_eval': s['eval']
+            'resulting_eval': s['eval'],
+            'game_time': (j['end_time'] - reference_time) / time_range,
         }
         out_json['data_points'].append(_state)
     print(str(i)+' of '+str(len(r)))
