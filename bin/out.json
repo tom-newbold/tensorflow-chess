@@ -1,1 +1,130 @@
-{"data_points": [{"player": 0, "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "following_move": "c4", "resulting_eval": {"type": "cp", "value": -16}}, {"player": 0, "fen": "rnbqkbnr/pppp1ppp/8/4p3/2P5/8/PP1PPPPP/RNBQKBNR w KQkq - 0 2", "following_move": "Nc3", "resulting_eval": {"type": "cp", "value": 21}}, {"player": 0, "fen": "rnbqk1nr/pppp1ppp/8/2b1p3/2P5/2N5/PP1PPPPP/R1BQKBNR w KQkq - 2 3", "following_move": "a3", "resulting_eval": {"type": "cp", "value": 50}}, {"player": 0, "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2P5/P1N5/1P1PPPPP/R1BQKBNR w KQkq - 1 4", "following_move": "b4", "resulting_eval": {"type": "cp", "value": 69}}, {"player": 0, "fen": "r1bqk1nr/pppp1ppp/2n5/4p3/1PPb4/P1N5/3PPPPP/R1BQKBNR w KQkq - 1 5", "following_move": "e3", "resulting_eval": {"type": "cp", "value": -18}}, {"player": 0, "fen": "r1bqk1nr/pppp1ppp/2n5/4p3/1PP5/P1b1P3/3P1PPP/R1BQKBNR w KQkq - 0 6", "following_move": "dxc3", "resulting_eval": {"type": "cp", "value": -48}}, {"player": 0, "fen": "r1bqk1nr/ppp2ppp/2np4/4p3/1PP5/P1P1P3/5PPP/R1BQKBNR w KQkq - 0 7", "following_move": "h3", "resulting_eval": {"type": "cp", "value": -72}}, {"player": 0, "fen": "r1bqk1nr/ppp3pp/2np1p2/4p3/1PP5/P1P1P2P/5PP1/R1BQKBNR w KQkq - 0 8", "following_move": "c5", "resulting_eval": {"type": "cp", "value": -29}}, {"player": 0, "fen": "r1bqk1nr/ppp3pp/2n2p2/2p1p3/1P6/P1P1P2P/5PP1/R1BQKBNR w KQkq - 0 9", "following_move": "Qa4", "resulting_eval": {"type": "cp", "value": -44}}, {"player": 0, "fen": "r1bqk1nr/1pp3pp/p1n2p2/2p1p3/QP6/P1P1P2P/5PP1/R1B1KBNR w KQkq - 0 10", "following_move": "f4", "resulting_eval": {"type": "cp", "value": -178}}, {"player": 0, "fen": "r1bqk1nr/2p3pp/p1n2p2/1pp1p3/QP3P2/P1P1P2P/6P1/R1B1KBNR w KQkq - 0 11", "following_move": "Qb3", "resulting_eval": {"type": "cp", "value": -167}}, {"player": 0, "fen": "r1bqk1nr/2p3pp/p1n2p2/1p2p3/1Pp2P2/PQP1P2P/6P1/R1B1KBNR w KQkq - 0 12", "following_move": "Bxc4", "resulting_eval": {"type": "cp", "value": -340}}, {"player": 0, "fen": "r1bqk1nr/2p3pp/p4p2/np2p3/1PB2P2/PQP1P2P/6P1/R1B1K1NR w KQkq - 1 13", "following_move": "Bf7+", "resulting_eval": {"type": "cp", "value": 502}}, {"player": 0, "fen": "r1bq2nr/2pk1Bpp/p4p2/np2p3/1P3P2/PQP1P2P/6P1/R1B1K1NR w KQ - 3 14", "following_move": "Qe6#", "resulting_eval": {"type": "mate", "value": 0}}]}
+{
+    "data_points": [
+        {
+            "player": 0,
+            "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            "following_move": "c4",
+            "resulting_eval": {
+                "type": "cp",
+                "value": -16
+            }
+        },
+        {
+            "player": 0,
+            "fen": "rnbqkbnr/pppp1ppp/8/4p3/2P5/8/PP1PPPPP/RNBQKBNR w KQkq - 0 2",
+            "following_move": "Nc3",
+            "resulting_eval": {
+                "type": "cp",
+                "value": 21
+            }
+        },
+        {
+            "player": 0,
+            "fen": "rnbqk1nr/pppp1ppp/8/2b1p3/2P5/2N5/PP1PPPPP/R1BQKBNR w KQkq - 2 3",
+            "following_move": "a3",
+            "resulting_eval": {
+                "type": "cp",
+                "value": 50
+            }
+        },
+        {
+            "player": 0,
+            "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2P5/P1N5/1P1PPPPP/R1BQKBNR w KQkq - 1 4",
+            "following_move": "b4",
+            "resulting_eval": {
+                "type": "cp",
+                "value": 69
+            }
+        },
+        {
+            "player": 0,
+            "fen": "r1bqk1nr/pppp1ppp/2n5/4p3/1PPb4/P1N5/3PPPPP/R1BQKBNR w KQkq - 1 5",
+            "following_move": "e3",
+            "resulting_eval": {
+                "type": "cp",
+                "value": -18
+            }
+        },
+        {
+            "player": 0,
+            "fen": "r1bqk1nr/pppp1ppp/2n5/4p3/1PP5/P1b1P3/3P1PPP/R1BQKBNR w KQkq - 0 6",
+            "following_move": "dxc3",
+            "resulting_eval": {
+                "type": "cp",
+                "value": -48
+            }
+        },
+        {
+            "player": 0,
+            "fen": "r1bqk1nr/ppp2ppp/2np4/4p3/1PP5/P1P1P3/5PPP/R1BQKBNR w KQkq - 0 7",
+            "following_move": "h3",
+            "resulting_eval": {
+                "type": "cp",
+                "value": -72
+            }
+        },
+        {
+            "player": 0,
+            "fen": "r1bqk1nr/ppp3pp/2np1p2/4p3/1PP5/P1P1P2P/5PP1/R1BQKBNR w KQkq - 0 8",
+            "following_move": "c5",
+            "resulting_eval": {
+                "type": "cp",
+                "value": -29
+            }
+        },
+        {
+            "player": 0,
+            "fen": "r1bqk1nr/ppp3pp/2n2p2/2p1p3/1P6/P1P1P2P/5PP1/R1BQKBNR w KQkq - 0 9",
+            "following_move": "Qa4",
+            "resulting_eval": {
+                "type": "cp",
+                "value": -44
+            }
+        },
+        {
+            "player": 0,
+            "fen": "r1bqk1nr/1pp3pp/p1n2p2/2p1p3/QP6/P1P1P2P/5PP1/R1B1KBNR w KQkq - 0 10",
+            "following_move": "f4",
+            "resulting_eval": {
+                "type": "cp",
+                "value": -178
+            }
+        },
+        {
+            "player": 0,
+            "fen": "r1bqk1nr/2p3pp/p1n2p2/1pp1p3/QP3P2/P1P1P2P/6P1/R1B1KBNR w KQkq - 0 11",
+            "following_move": "Qb3",
+            "resulting_eval": {
+                "type": "cp",
+                "value": -167
+            }
+        },
+        {
+            "player": 0,
+            "fen": "r1bqk1nr/2p3pp/p1n2p2/1p2p3/1Pp2P2/PQP1P2P/6P1/R1B1KBNR w KQkq - 0 12",
+            "following_move": "Bxc4",
+            "resulting_eval": {
+                "type": "cp",
+                "value": -340
+            }
+        },
+        {
+            "player": 0,
+            "fen": "r1bqk1nr/2p3pp/p4p2/np2p3/1PB2P2/PQP1P2P/6P1/R1B1K1NR w KQkq - 1 13",
+            "following_move": "Bf7+",
+            "resulting_eval": {
+                "type": "cp",
+                "value": 502
+            }
+        },
+        {
+            "player": 0,
+            "fen": "r1bq2nr/2pk1Bpp/p4p2/np2p3/1P3P2/PQP1P2P/6P1/R1B1K1NR w KQ - 3 14",
+            "following_move": "Qe6#",
+            "resulting_eval": {
+                "type": "mate",
+                "value": 0
+            }
+        }
+    ]
+}
