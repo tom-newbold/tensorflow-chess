@@ -14,10 +14,15 @@ while len(r) == 0:
         m = 12
 
 
+MAX_GAMES = 300 # truncate list at number of games
+if len(r) > MAX_GAMES:
+    r = r[:MAX_GAMES]
+
 out_json = {'data_points':[]}
 reference_time = r[0]['end_time']
 time_range = r[-1]['end_time'] - reference_time
-for i in range(len(r)): # iterate over games from that month
+
+for i in range(len(r)): # iterate over games from api
     j = r[i]
     with open('bin\\temp.pgn', 'w') as f:
         f.write(j['pgn'])
