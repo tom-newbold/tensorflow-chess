@@ -22,8 +22,7 @@ class CoupledStockfish:
             return self.stockfish_instance.get_evaluation()
 
     def run(self):
-        #mline = [m.uci() for m in self.game.mainline_moves()]
-        #print('SAN: '+str(self.game.mainline_moves()))
+        out = []
         mline = self.game.mainline_moves()
         print('SAN: '+str(mline))
         mline = list(mline)
@@ -39,10 +38,15 @@ class CoupledStockfish:
                     print(m_san+': mate in '+str(eval['value']))
                 else:
                     print('evaluation failed')
+                out.append({
+                    'fen':self.board.fen(),
+                    'move':m_san,
+                    'eval':eval
+                })
                 ## extract state here and eval position; add to database
             else:
                 self.make_move(m)
-        return self.board
+        return (out, self.board)
 
     def get_sf_board(self):
         return self.stockfish_instance.get_board_visual()
