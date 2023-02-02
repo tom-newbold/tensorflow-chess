@@ -32,7 +32,7 @@ for i in range(len(r)): # iterate over games from that month
             'resulting_eval': s['eval']
         }
         out_json['data_points'].append(_state)
-    print(i)
+    print(str(i)+' of '+str(len(r)))
 
 
 print(str(len(out_json['data_points']))+' game states extracted from '+str(len(r))+' games')
