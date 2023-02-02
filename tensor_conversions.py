@@ -22,7 +22,14 @@ def fen_to_tensor(fen_string):
     output = tf.convert_to_tensor(array.transpose())
     return output
 
-print(fen_to_tensor("r1bq2nr/2pk1Bpp/p4p2/np2p3/1P3P2/PQP1P2P/6P1/R1B1K1NR w KQ - 3 14"))
+#print(fen_to_tensor("r1bq2nr/2pk1Bpp/p4p2/np2p3/1P3P2/PQP1P2P/6P1/R1B1K1NR w KQ - 3 14"))
+
+def lan_to_tensor(lan_string):
+    a = np.zeros((2, 8, 8))
+    s = [lan_string[:2], lan_string[2:]]
+    for i in range(2):
+        a[i, 8-int(s[i][1]), 'abcdefgh'.index(s[i][0])] = 1
+    return tf.convert_to_tensor(a)
 
 def tensor_to_lan(tensor):
     out = ''
@@ -31,11 +38,7 @@ def tensor_to_lan(tensor):
         for y in range(8):
             for x in range(8):
                 if t[d][y][x] == 1:
-                    out += 'abcdefgh'[x] + str(8-y) # is y right here?
+                    out += 'abcdefgh'[x] + str(8-y)
     return out
 
-a = np.zeros((2, 8, 8)) # dim, y(num), x(letter)
-a[0, 6, 4] = 1 #e2
-a[1, 4, 4] = 1 #e4
-
-print(tensor_to_lan(tf.convert_to_tensor(a)))
+print(tensor_to_lan(lan_to_tensor('a1h8')))
