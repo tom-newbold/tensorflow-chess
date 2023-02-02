@@ -31,11 +31,11 @@ def tensor_to_lan(tensor):
         for y in range(8):
             for x in range(8):
                 if t[d][y][x] == 1:
-                    out += 'abcdefgh'[x] + str(y+1)
+                    out += 'abcdefgh'[x] + str(8-y) # is y right here?
     return out
 
 a = np.zeros((2, 8, 8)) # dim, y(num), x(letter)
-a[0, 1, 4] = 1 #e2
-a[1, 3, 4] = 1 #e4
+a[0, 6, 4] = 1 #e2
+a[1, 4, 4] = 1 #e4
 
 print(tensor_to_lan(tf.convert_to_tensor(a)))
