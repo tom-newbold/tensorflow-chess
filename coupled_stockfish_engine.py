@@ -4,7 +4,7 @@ from stockfish import Stockfish
 import chess.pgn as pgn
 
 class CoupledStockfish:
-    def __init__(self, pgn_path, username):
+    def __init__(self, pgn_path, username, out=True):
         self.stockfish_instance = Stockfish(path=STOCKFISH_PATH)
         self.game = pgn.read_game(open(pgn_path, encoding='utf-8')) # TODO: array for multiple games? and regular json input variation
         if self.game.headers['White'] == username:
@@ -14,6 +14,7 @@ class CoupledStockfish:
         else:
             self.player = -1
         self.board = self.game.board()
+        self.output = out
 
     def make_move(self, move, eval=False):
         self.board.push(move)
@@ -24,7 +25,7 @@ class CoupledStockfish:
     def run(self):
         out = []
         mline = self.game.mainline_moves()
-        print('SAN: '+str(mline))
+        if self.output: print('SAN: '+str(mline))
         mline = list(mline)
         # move, response = ['','']
         for i in range(len(mline)):
@@ -33,12 +34,13 @@ class CoupledStockfish:
             if i%2 == self.player: # player turn
                 fen_context = self.board.fen()
                 eval = self.make_move(m, eval=True)
-                if eval['type']=='cp':
-                    print(m_san+': '+str(eval['value'])+' centipawns')
-                elif eval['type']=='mate':
-                    print(m_san+': mate in '+str(eval['value']))
-                else:
-                    print('evaluation failed')
+                if self.output:
+                    if eval['type']=='cp':
+                        print(m_san+': '+str(eval['value'])+' centipawns')
+                    elif eval['type']=='mate':
+                        print(m_san+': mate in '+str(eval['value']))
+                    else:
+                        print('evaluation failed')
                 out.append({
                     'fen':fen_context,
                     'move':m_san,
