@@ -16,7 +16,7 @@ while len(r) == 0:
 
 MAX_GAMES = 300 # truncate list at number of games
 if len(r) > MAX_GAMES:
-    r = r[:MAX_GAMES]
+    r = r[-MAX_GAMES:]
 
 out_json = {'data_points':[]}
 reference_time = r[0]['end_time']
