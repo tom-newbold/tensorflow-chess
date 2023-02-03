@@ -15,8 +15,7 @@ class CoupledStockfish:
                 self.games.append(g)
                 g = pgn.read_game(open(pgn_path, encoding='utf-8'))
         except FileNotFoundError:
-            self.games = [pgn.read_game(StringIO('1.'))]
-        self.game = pgn.read_game(open(pgn_path, encoding='utf-8')) # TODO: array for multiple games? and regular json input variation
+            self.games = [pgn.read_game(StringIO('1.'))] ## add support for regular json input (need player input)
         if self.game.headers['White'] == username:
             self.player = 0
         elif self.game.headers['Black'] == username:
