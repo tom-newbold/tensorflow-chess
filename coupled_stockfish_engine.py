@@ -30,6 +30,7 @@ class CoupledStockfish:
         self.stockfish_instance.make_moves_from_current_position([move.uci()])
         if eval:
             return self.stockfish_instance.get_evaluation()
+        ## TODO: return exception if move invalid??
 
     def run(self, game_id=0):
         out = []
