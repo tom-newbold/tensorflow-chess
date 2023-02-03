@@ -3,9 +3,19 @@ STOCKFISH_PATH = 'stockfish-test\\stockfish_20011801_x64.exe'
 from stockfish import Stockfish
 import chess.pgn as pgn
 
+#?
+from io import StringIO
+
 class CoupledStockfish:
     def __init__(self, pgn_path, username, out=True):
         self.stockfish_instance = Stockfish(path=STOCKFISH_PATH)
+        try:
+            g = pgn.read_game(open(pgn_path, encoding='utf-8'))
+            while not (g is None):
+                self.games.append(g)
+                g = pgn.read_game(open(pgn_path, encoding='utf-8'))
+        except FileNotFoundError:
+            self.games = [pgn.read_game(StringIO('1.'))]
         self.game = pgn.read_game(open(pgn_path, encoding='utf-8')) # TODO: array for multiple games? and regular json input variation
         if self.game.headers['White'] == username:
             self.player = 0
@@ -22,9 +32,9 @@ class CoupledStockfish:
         if eval:
             return self.stockfish_instance.get_evaluation()
 
-    def run(self):
+    def run(self, game_id=0):
         out = []
-        mline = self.game.mainline_moves()
+        mline = self.games[game_id].mainline_moves()
         if self.output: print('SAN: '+str(mline))
         mline = list(mline)
         # move, response = ['','']
