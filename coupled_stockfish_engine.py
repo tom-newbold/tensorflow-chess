@@ -16,17 +16,17 @@ class CoupledStockfish:
                 g = pgn.read_game(open(pgn_path, encoding='utf-8'))
         except FileNotFoundError:
             self.games = [pgn.read_game(StringIO('1.'))] ## add support for regular json input (need player input)
-        if self.game.headers['White'] == username:
-            self.player = 0
-        elif self.game.headers['Black'] == username:
-            self.player = 1
-        else:
-            self.player = -1
-        self.board = self.game.board()
-        self.output = out
+        self.player = []
+        for i in range(len(self.games)):
+            if self.games[i].headers['White'] == username:
+                self.player.append(0)
+            elif self.games[i].headers['Black'] == username:
+                self.player.append(1)
+            else:
+                self.player.append(-1)
 
-    def make_move(self, move, eval=False):
-        self.board.push(move)
+    def make_move(self, move, game_id=0, eval=False):
+        self.games[game_id].board.push(move)
         self.stockfish_instance.make_moves_from_current_position([move.uci()])
         if eval:
             return self.stockfish_instance.get_evaluation()
@@ -36,12 +36,13 @@ class CoupledStockfish:
         mline = self.games[game_id].mainline_moves()
         if self.output: print('SAN: '+str(mline))
         mline = list(mline)
+        b = self.games[game_id].board()
         # move, response = ['','']
         for i in range(len(mline)):
             m = mline[i]
-            m_san = self.board.san(m)
-            if i%2 == self.player: # player turn
-                fen_context = self.board.fen()
+            m_san = b.san(m)
+            if i%2 == self.player[game_id]: # player turn
+                fen_context = b.fen()
                 eval = self.make_move(m, eval=True)
                 if self.output:
                     if eval['type']=='cp':
