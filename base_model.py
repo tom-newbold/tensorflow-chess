@@ -51,6 +51,22 @@ class ModelWrapper:
         ideal_out = tf.convert_to_tensor(ideal_out)
         return [t_out, tenconv.tensor_to_lan(ideal_out)]
 
+MOVE_TREE = open('bin\\inital_dataset_compressed.json', 'r')
+
+from base_stockfish import SF # rewrite this, put in CSE class ??
+def composite_loss(omega, target_tensor, output_tensor, player, fen, move):
+    e_sigma_delta = tf.reduce_sum(tf.square(tf.math.subtract(target_tensor, output_tensor)))
+    e_delta_sigma = tf.reduce_sum(target_tensor)**2 - tf.reduce_sum(output_tensor)**2
+    p = 128 # P_max
+    if fen in MOVE_TREE:
+        for m in MOVE_TREE[fen]:
+            if m['move'] == move:
+                p = omega
+    else:
+        if SF().check_move(fen, move):
+            p = 1
+    return e_sigma_delta * e_delta_sigma * p
+
 
 if __name__ == '__main__':
     model = ModelWrapper()
