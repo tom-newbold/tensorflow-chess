@@ -57,7 +57,7 @@ from base_stockfish import SF # rewrite this, put in CSE class ??
 def composite_loss(omega, target_tensor, output_tensor, player, fen, move):
     e_sigma_delta = tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor))).numpy()
     e_delta_sigma = (tf.reduce_sum(target_tensor).numpy())**2 - (tf.reduce_sum(output_tensor).numpy())**2
-    p = 128 # P_max
+    p = 128 # P_max, value tbd
     if fen in MOVE_TREE:
         for m in MOVE_TREE[fen]:
             if m['move'] == move:
