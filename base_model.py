@@ -61,10 +61,13 @@ def composite_loss(omega, target_tensor, output_tensor, player, fen, move):
     if fen in MOVE_TREE:
         for m in MOVE_TREE[fen]:
             if m['move'] == move:
+                print('in move tree')
                 p = omega
     else:
         if SF().check_move(fen, move):
+            print('valid')
             p = 1
+        else: print('invalid')
     return e_sigma_delta * e_delta_sigma * p
 
 
