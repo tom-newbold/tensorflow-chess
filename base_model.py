@@ -55,8 +55,8 @@ MOVE_TREE = open('bin\\inital_dataset_compressed.json', 'r')
 
 from base_stockfish import SF # rewrite this, put in CSE class ??
 def composite_loss(omega, target_tensor, output_tensor, player, fen, move):
-    e_sigma_delta = tf.reduce_sum(tf.square(tf.math.subtract(target_tensor, output_tensor)))
-    e_delta_sigma = tf.reduce_sum(target_tensor)**2 - tf.reduce_sum(output_tensor)**2
+    e_sigma_delta = tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor))).numpy()
+    e_delta_sigma = (tf.reduce_sum(target_tensor).numpy())**2 - (tf.reduce_sum(output_tensor).numpy())**2
     p = 128 # P_max
     if fen in MOVE_TREE:
         for m in MOVE_TREE[fen]:
