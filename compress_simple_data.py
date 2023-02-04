@@ -16,5 +16,12 @@ for i in range(l):
         out_json[fen] = [[],[]]
     out_json[fen][dp['player']].append(move)
 
+# removes any states with no alternate cases
+for fen in list(out_json):
+    dp = out_json[fen]
+    if len(dp[0]) + len(dp[1]) == 1:
+        out_json.pop(fen)
+
+
 with open('bin\\inital_dataset_compressed.json', 'w') as file:
     json.dump(out_json, file)
