@@ -71,5 +71,8 @@ def composite_loss(omega, target_tensor, output_tensor, player, fen, move):
 if __name__ == '__main__':
     model = ModelWrapper()
     print('model initialised')
-    out = model('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1') # should return opening when trained
+    test_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    out = model(test_fen) # should return opening when trained
     print(out[1])
+    l = composite_loss(0.8, tenconv.lan_to_tensor('e2e4'), out[0], 0, test_fen, out[1])
+    print(l)
