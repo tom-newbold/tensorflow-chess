@@ -1,4 +1,4 @@
-STOCKFISH_PATH = 'stockfish-test\\stockfish_20011801_x64.exe'
+STOCKFISH_PATH = 'stockfish_test\\stockfish_20011801_x64.exe'
 
 from stockfish import Stockfish
 import chess.pgn as pgn
