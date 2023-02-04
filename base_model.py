@@ -1,15 +1,16 @@
 import tensorflow as tf
+import numpy as np
 import tensor_conversions.tensor_conversions as tenconv
 
 class Layer(tf.Module):
     def __init__(self, nodes_in, nodes_out, name=None):
         super().__init__(name=name)
-        self.w = tf.Variable(tf.random.normal([nodes_in, nodes_out]), name='w') # weights
-        self.b = tf.Variable(tf.zeros([nodes_out]), name='b') # biases
+        self.w = tf.Variable(tf.random.normal([nodes_in, nodes_out]), name='w', dtype=tf.float32) # weights
+        self.b = tf.Variable(tf.zeros([nodes_out]), name='b', dtype=tf.float32) # biases
     
     def __call__(self, x):
-        y = tf.matmul(x, self.w) + self.b
-        return tf.nn.rect(y) # does this need rectifying?
+        y = tf.linalg.matmul(tf.cast(x, tf.float32), self.w) + self.b
+        return tf.nn.relu(y)
 
 class TwoLayerModel(tf.Module):
     def __init__(self, name=None):
@@ -26,11 +27,33 @@ class ModelWrapper:
         self.model_instance = TwoLayerModel(name='model_instanace')
 
     def __call__(self, fen):
-        t_in = tenconv.fen_to_tensor(fen)
-        t_out = self.model_instance(t_in)
-        return tenconv.tensor_to_lan()
+        t_in = tenconv.fen_to_tensor(fen).numpy()
+        model_in = tf.constant([[t_in[x, y] for x in range(8) for y in range(8)]]) # convert to column vector
+        model_out = self.model_instance(model_in) # pass into module
+        #print(model_out)
+        t_out = np.zeros((2, 8, 8))
+        ideal_out = np.zeros((2, 8, 8))
+        for z in range(2): # convert back to tensor, generate ideal tensor
+            max = -1
+            max_xyz = [-1, -1, -1]
+            for y in range(8):
+                for x in range(8):
+                    i = z*64 + y*8 + x
+                    e = model_out[0][i]
+                    t_out[z][y][x] = e
+                    if e > max:
+                        max = e
+                        ideal_out[max_xyz[2]][max_xyz[1]][max_xyz[0]] = 0
+                        ideal_out[z][y][x] = 1
+                        max_xyz = [x, y, z] # is x, y orientation correct? TODO
+
+        t_out = tf.convert_to_tensor(t_out)
+        ideal_out = tf.convert_to_tensor(ideal_out)
+        return [t_out, tenconv.tensor_to_lan(ideal_out)]
 
 
 if __name__ == '__main__':
     model = ModelWrapper()
     print('model initialised')
+    out = model('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1') # should return opening when trained
+    print(out[1])
