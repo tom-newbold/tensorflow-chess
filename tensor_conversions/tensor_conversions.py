@@ -41,4 +41,4 @@ def tensor_to_lan(tensor):
                     out += 'abcdefgh'[x] + str(8-y)
     return out
 
-print(tensor_to_lan(lan_to_tensor('a1h8')))
+#print(tensor_to_lan(lan_to_tensor('a1h8')))
