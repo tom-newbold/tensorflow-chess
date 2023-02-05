@@ -6,8 +6,8 @@ import json
 class Layer(tf.Module):
     def __init__(self, nodes_in: int, nodes_out: int, name: str=None):
         super().__init__(name=name)
-        self.w = tf.Variable(tf.random.normal([nodes_in, nodes_out]), name='w', dtype=tf.float32) # weights
-        self.b = tf.Variable(tf.zeros([nodes_out]), name='b', dtype=tf.float32) # biases
+        self.w = tf.Variable(tf.random.normal([nodes_in, nodes_out]), trainable=True, name='w', dtype=tf.float32) # weights
+        self.b = tf.Variable(tf.zeros([nodes_out]), trainable=True, name='b', dtype=tf.float32) # biases
     
     def __call__(self, x: tf.Tensor) -> tf.Tensor:
         y = tf.linalg.matmul(tf.cast(x, tf.float32), self.w) + self.b
@@ -56,8 +56,8 @@ MOVE_TREE = open('bin\\inital_dataset_compressed.json', 'r')
 
 from base_stockfish import SF # rewrite this, put in CSE class ??
 def composite_loss(omega: float, target_tensor: tf.Tensor, output_tensor: tf.Tensor, player: int, fen: str, move: str):
-    e_sigma_delta = tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor))).numpy()
-    e_delta_sigma = (tf.reduce_sum(target_tensor).numpy())**2 - (tf.reduce_sum(output_tensor).numpy())**2
+    e_sigma_delta = tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor)))
+    e_delta_sigma = tf.reduce_sum(target_tensor)**2 - tf.reduce_sum(output_tensor)**2
     p = 128 # P_max, value tbd
     if fen in MOVE_TREE:
         for m in MOVE_TREE[fen][player]:
@@ -69,28 +69,32 @@ def composite_loss(omega: float, target_tensor: tf.Tensor, output_tensor: tf.Ten
             print('valid')
             p = 1
         else: print('invalid')
-    return e_sigma_delta * e_delta_sigma * p
+    return e_sigma_delta * e_delta_sigma * p # THIS FUNCTION CANNOT USE NUMPY OPERATIONS OR GRAD WILL BE ZERO
 
 def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
-    return tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor))).numpy()
+    return tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor)))#.numpy().item() # add .item() to composite_loss
 
 def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], learning_rate: float=0.1) -> float:
     target_t = tenconv.lan_to_tensor(context['following_move'])
-    model_out = model_wrapper(context['fen'])
-    print('model returned move: '+model_out[1])
 
-    model = model_wrapper.model_instance
-    for m in [model.layer_1, model.layer_2]:
-        with tf.GradientTape(persistent=True) as grad_tape:
+    with tf.GradientTape(persistent=True) as grad_tape:
+        model_out = model_wrapper(context['fen'])
+        print('model returned move: '+model_out[1])
+
+        model = model_wrapper.model_instance
+        for m in [model.layer_1, model.layer_2]:
+            # grad_tape.watch([m.w, m.b])
             #l = composite_loss(0.8, target_t, model_out[0], context['player'], context['fen'], model_out[1])
             l = basic_loss(target_t, model_out[0])
-        
-        #model = model_wrapper.model_instance
-        #for m in [model.layer_1, model.layer_2]:
-        dw, db = grad_tape.gradient(l, [m.w, m.b])
-        m.w.assign_sub(learning_rate * dw)
-        m.b.assign_sub(learning_rate * db)
-        del grad_tape
+            
+            #model = model_wrapper.model_instance
+            #for m in [model.layer_1, model.layer_2]:
+            dw, db = grad_tape.gradient(l, [m.w, m.b]) # <- TODO THIS IS THE ERROR
+            print('weight grad: '+str(dw))
+            
+            m.w.assign_sub(learning_rate * dw)
+            m.b.assign_sub(learning_rate * db)
+    del grad_tape
     return l
 
 def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
@@ -98,7 +102,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
             "player": 0,
             "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             "following_move": "e2e3" }]
-    #for e in range(len(data)):
+    #for e in range(len(data)): _loss = train(model_wrapper, data[e])
     for e in range(20):
         _loss = train(model_wrapper, data[0])
         print(_loss)
