@@ -101,7 +101,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
         _loss = train(model_wrapper, data[0], 0.1)
         print('loss: '+str(_loss.numpy()))
     print('\nfinal tensor:')
-    print(model_wrapper(data[0]['fen']))
+    print(model_wrapper(data[0]['fen'])[0])
 
 
 if __name__ == '__main__':
