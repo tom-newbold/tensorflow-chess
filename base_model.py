@@ -67,7 +67,7 @@ def composite_loss(omega: float, target_tensor: tf.Tensor, output_tensor: tf.Ten
     return e_sigma_delta * e_delta_sigma * p
 
 def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
-    return tf.reduce_sum(tf.square(tf.subtract(tf.cast(target_tensor, tf.float32), output_tensor)))
+    return tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor)))
 
 def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], learning_rate: float=0.1) -> float:
     model = model_wrapper.model_instance
@@ -79,8 +79,8 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
 
         for m in [model.layer_1, model.layer_2]:
             # grad_tape.watch([m.w, m.b])
-            #l = composite_loss(0.8, target_t, model_out[0], context['player'], context['fen'], model_out[1])
-            l = basic_loss(target_t, model_out[0])
+            #l = basic_loss(tf.cast(target_t, tf.float32), model_out[0])
+            l = composite_loss(0.8, tf.cast(target_t, tf.float32), model_out[0], context['player'], context['fen'], model_out[1])
             
             dw, db = grad_tape.gradient(l, [m.w, m.b]) # <- TODO THIS IS THE ERROR
             
