@@ -43,7 +43,8 @@ class CoupledStockfish:
         b = self.games[game_id].board()
         for i in range(len(mline)):
             m = mline[i]
-            m_san = b.san(m)
+            m_san = b.lan(m)
+            m_lan = b.san(m)
             if i%2 == self.player[game_id]: # player turn
                 fen_context = b.fen()
                 eval = self.make_move(b, m, eval=True)
@@ -56,7 +57,7 @@ class CoupledStockfish:
                         print('evaluation failed')
                 out.append({
                     'fen':fen_context,
-                    'move':m_san,
+                    'move':m_lan,
                     'eval':eval
                 })
                 ## extract state here and eval position; add to database

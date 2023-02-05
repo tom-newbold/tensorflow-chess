@@ -40,7 +40,7 @@ for i in range(len(r)): # iterate over games from api
             'game_time': (j['end_time'] - reference_time) / time_range,
         }
         out_json['data_points'].append(_state)
-    print(str(i+1)+' of '+str(len(r)))
+    print(str(i+1)+' of '+str(len(r)), end='\r')
 
 
 print(str(len(out_json['data_points']))+' game states extracted from '+str(len(r))+' games')
