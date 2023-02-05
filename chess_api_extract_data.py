@@ -28,7 +28,7 @@ for i in range(len(r)): # iterate over games from api
         f.write(j['pgn'])
         f.close()
 
-    sf = cse.CoupledStockfish('bin\\temp.pgn', 'The111thTom', out=True) # make false
+    sf = cse.CoupledStockfish('bin\\temp.pgn', 'The111thTom', out=False)
     states, b = sf.run()
     p = sf.player
     for s in states: # add all states to output json
