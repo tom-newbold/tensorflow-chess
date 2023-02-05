@@ -76,15 +76,17 @@ def train(model_wrapper, context, learning_rate=0.1):
     model_out = model_wrapper(context['fen'])
     print('model returned move: '+model_out[1])
 
-    with tf.GradientTape(persistent=True) as grad_tape:
-        l = composite_loss(0.8, target_t, model_out[0], context['player'], context['fen'], model_out[1])
-    
     model = model_wrapper.model_instance
     for m in [model.layer_1, model.layer_2]:
+        with tf.GradientTape(persistent=True) as grad_tape:
+            l = composite_loss(0.8, target_t, model_out[0], context['player'], context['fen'], model_out[1])
+        
+        #model = model_wrapper.model_instance
+        #for m in [model.layer_1, model.layer_2]:
         dw, db = grad_tape.gradient(l, [m.w, m.b])
         m.w.assign_sub(learning_rate * dw)
         m.b.assign_sub(learning_rate * db)
-    del grad_tape
+        del grad_tape
     return l
 
 def train_loop(model_wrapper, data):
