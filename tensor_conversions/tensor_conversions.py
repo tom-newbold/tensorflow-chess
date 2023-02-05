@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-def fen_to_tensor(fen_string):
+def fen_to_tensor(fen_string: str) -> tf.Tensor:
     map = { 'p':1, 'n':2, 'b':3, 'r':4, 'q':5, 'k':6 }
     array = np.zeros((8,8))
     rows = fen_string.split(' ')[0].split('/')
@@ -24,14 +24,14 @@ def fen_to_tensor(fen_string):
 
 #print(fen_to_tensor("r1bq2nr/2pk1Bpp/p4p2/np2p3/1P3P2/PQP1P2P/6P1/R1B1K1NR w KQ - 3 14"))
 
-def lan_to_tensor(lan_string):
+def lan_to_tensor(lan_string: str) -> tf.Tensor:
     a = np.zeros((2, 8, 8))
     s = [lan_string[:2], lan_string[2:]]
     for i in range(2):
         a[i, 8-int(s[i][1]), 'abcdefgh'.index(s[i][0])] = 1
     return tf.convert_to_tensor(a)
 
-def tensor_to_lan(tensor):
+def tensor_to_lan(tensor: tf.Tensor) -> str:
     out = ''
     t = tensor.numpy()
     for d in range(2):

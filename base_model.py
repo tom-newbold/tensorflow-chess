@@ -4,22 +4,22 @@ import tensor_conversions.tensor_conversions as tenconv
 import json
 
 class Layer(tf.Module):
-    def __init__(self, nodes_in, nodes_out, name=None):
+    def __init__(self, nodes_in: int, nodes_out: int, name: str=None):
         super().__init__(name=name)
         self.w = tf.Variable(tf.random.normal([nodes_in, nodes_out]), name='w', dtype=tf.float32) # weights
         self.b = tf.Variable(tf.zeros([nodes_out]), name='b', dtype=tf.float32) # biases
     
-    def __call__(self, x):
+    def __call__(self, x: tf.Tensor) -> tf.Tensor:
         y = tf.linalg.matmul(tf.cast(x, tf.float32), self.w) + self.b
         return tf.nn.relu(y)
 
 class TwoLayerModel(tf.Module):
-    def __init__(self, name=None):
+    def __init__(self, name: str=None):
         super().__init__(name=name)
         self.layer_1 = Layer(64, 128)
         self.layer_2 = Layer(128, 128)
     
-    def __call__(self, x):
+    def __call__(self, x: tf.Tensor) -> tf.Tensor:
         _x = self.layer_1(x)
         return self.layer_2(_x)
 
@@ -27,7 +27,7 @@ class ModelWrapper:
     def __init__(self):
         self.model_instance = TwoLayerModel(name='model_instanace')
 
-    def __call__(self, fen):
+    def __call__(self, fen: str) -> list[tf.Tensor, str]:
         t_in = tenconv.fen_to_tensor(fen).numpy()
         model_in = tf.constant([[t_in[x, y] for x in range(8) for y in range(8)]]) # convert to column vector
         model_out = self.model_instance(model_in) # pass into module
@@ -55,12 +55,12 @@ class ModelWrapper:
 MOVE_TREE = open('bin\\inital_dataset_compressed.json', 'r')
 
 from base_stockfish import SF # rewrite this, put in CSE class ??
-def composite_loss(omega, target_tensor, output_tensor, player, fen, move):
+def composite_loss(omega: float, target_tensor: tf.Tensor, output_tensor: tf.Tensor, player: int, fen: str, move: str):
     e_sigma_delta = tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor))).numpy()
     e_delta_sigma = (tf.reduce_sum(target_tensor).numpy())**2 - (tf.reduce_sum(output_tensor).numpy())**2
     p = 128 # P_max, value tbd
     if fen in MOVE_TREE:
-        for m in MOVE_TREE[fen]:
+        for m in MOVE_TREE[fen][player]:
             if m['move'] == move:
                 print('in move tree')
                 p = omega
@@ -71,10 +71,10 @@ def composite_loss(omega, target_tensor, output_tensor, player, fen, move):
         else: print('invalid')
     return e_sigma_delta * e_delta_sigma * p
 
-def basic_loss(target_tensor, output_tensor):
+def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
     return tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor))).numpy()
 
-def train(model_wrapper, context, learning_rate=0.1):
+def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], learning_rate: float=0.1) -> float:
     target_t = tenconv.lan_to_tensor(context['following_move'])
     model_out = model_wrapper(context['fen'])
     print('model returned move: '+model_out[1])
@@ -93,7 +93,7 @@ def train(model_wrapper, context, learning_rate=0.1):
         del grad_tape
     return l
 
-def train_loop(model_wrapper, data):
+def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
     data = [{
             "player": 0,
             "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -102,7 +102,6 @@ def train_loop(model_wrapper, data):
     for e in range(20):
         _loss = train(model_wrapper, data[0])
         print(_loss)
-    return
 
 
 if __name__ == '__main__':

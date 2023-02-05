@@ -2,12 +2,13 @@ STOCKFISH_PATH = 'stockfish_test\\stockfish_20011801_x64.exe'
 
 from stockfish import Stockfish
 import chess.pgn as pgn
+import chess
 
 #?
 from io import StringIO
 
 class CoupledStockfish:
-    def __init__(self, pgn_path, username, out=True):
+    def __init__(self, pgn_path: str, username: str, out: bool=True):
         self.stockfish_instance = Stockfish(path=STOCKFISH_PATH)
         self.games = []
         try:
@@ -28,14 +29,14 @@ class CoupledStockfish:
                 self.player.append(-1)
         self.output = out
 
-    def make_move(self, board, move, eval=False):
+    def make_move(self, board: chess.Board, move: chess.Move, eval: bool=False) -> dict[str, int]:
         board.push(move)
         self.stockfish_instance.make_moves_from_current_position([move.uci()])
         if eval:
             return self.stockfish_instance.get_evaluation()
         ## TODO: return exception if move invalid??
 
-    def run(self, game_id=0):
+    def run(self, game_id: int=0) -> tuple[list, chess.Board]:
         out = []
         mline = self.games[game_id].mainline_moves()
         if self.output: print('SAN: '+str(mline))
@@ -65,7 +66,7 @@ class CoupledStockfish:
                 self.make_move(b, m)
         return (out, b)
 
-    def get_sf_board(self):
+    def get_sf_board(self) -> str:
         return self.stockfish_instance.get_board_visual()
 
 if __name__ == '__main__':
