@@ -28,11 +28,8 @@ class ModelWrapper:
         self.model_instance = TwoLayerModel(name='model_instanace')
 
     def __call__(self, fen: str) -> list[tf.Tensor, str]: # TODO REMOVE NUMPY FUNC
-        t_in = tenconv.fen_to_tensor(fen).numpy()
-        model_in = tf.constant([[t_in[x, y] for x in range(8) for y in range(8)]]) # convert to column vector
-        model_out = self.model_instance(model_in) # pass into module
-        #print(model_out)
-        t_out = np.zeros((2, 8, 8))
+        t_in = tenconv.fen_to_tensor(fen)
+        model_out = self.model_instance(tf.reshape(t_in, [1, 64])) # pass into module
         ideal_out = np.zeros((2, 8, 8))
         for z in range(2): # convert back to tensor, generate ideal tensor
             max = -1
@@ -41,16 +38,14 @@ class ModelWrapper:
                 for x in range(8):
                     i = z*64 + y*8 + x
                     e = model_out[0][i]
-                    t_out[z][y][x] = e
                     if e > max:
                         max = e
                         ideal_out[max_xyz[2]][max_xyz[1]][max_xyz[0]] = 0
                         ideal_out[z][y][x] = 1
                         max_xyz = [x, y, z] # is x, y orientation correct? TODO
 
-        t_out = tf.convert_to_tensor(t_out)
         ideal_out = tf.convert_to_tensor(ideal_out)
-        return [t_out, tenconv.tensor_to_lan(ideal_out)]
+        return [tf.reshape(model_out, [2, 8, 8]), tenconv.tensor_to_lan(ideal_out)]
 
 MOVE_TREE = open('bin\\inital_dataset_compressed.json', 'r')
 
@@ -72,7 +67,7 @@ def composite_loss(omega: float, target_tensor: tf.Tensor, output_tensor: tf.Ten
     return e_sigma_delta * e_delta_sigma * p
 
 def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
-    return tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor)))
+    return tf.reduce_sum(tf.square(tf.subtract(tf.cast(target_tensor, tf.float32), output_tensor)))
 
 def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], learning_rate: float=0.1) -> float:
     model = model_wrapper.model_instance
@@ -88,7 +83,6 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
             l = basic_loss(target_t, model_out[0])
             
             dw, db = grad_tape.gradient(l, [m.w, m.b]) # <- TODO THIS IS THE ERROR
-            print('weight grad: '+str(dw))
             
             m.w.assign_sub(learning_rate * dw)
             m.b.assign_sub(learning_rate * db)
@@ -101,7 +95,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
             "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             "following_move": "e2e3" }]
     #for e in range(len(data)): _loss = train(model_wrapper, data[e])
-    for e in range(20):
+    for e in range(10):
         _loss = train(model_wrapper, data[0])
         print(_loss)
 
