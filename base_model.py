@@ -75,10 +75,11 @@ def train(model_wrapper, context, learning_rate=0.1):
     target_t = tenconv.lan_to_tensor(context['following_move'])
     model_out = model_wrapper(context['fen'])
     l = composite_loss(0.8, target_t, model_out[0], context['player'], context['fen'], model_out[1])
-    m = model_wrapper.model_instance
-    dw, db = tf.GradientTape().gradient(l, [m.w, m.b])
-    m.w.assign_sub(learning_rate * dw)
-    m.b.assign_sub(learning_rate * db)
+    model = model_wrapper.model_instance
+    for m in [model.layer_1, model.layer_2]:
+        dw, db = tf.GradientTape().gradient(l, [m.w, m.b])
+        m.w.assign_sub(learning_rate * dw)
+        m.b.assign_sub(learning_rate * db)
     return l
 
 def train_loop(model_wrapper, data):
