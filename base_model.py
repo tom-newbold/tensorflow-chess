@@ -71,6 +71,9 @@ def composite_loss(omega, target_tensor, output_tensor, player, fen, move):
         else: print('invalid')
     return e_sigma_delta * e_delta_sigma * p
 
+def basic_loss(target_tensor, output_tensor):
+    return tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor))).numpy()
+
 def train(model_wrapper, context, learning_rate=0.1):
     target_t = tenconv.lan_to_tensor(context['following_move'])
     model_out = model_wrapper(context['fen'])
@@ -79,7 +82,8 @@ def train(model_wrapper, context, learning_rate=0.1):
     model = model_wrapper.model_instance
     for m in [model.layer_1, model.layer_2]:
         with tf.GradientTape(persistent=True) as grad_tape:
-            l = composite_loss(0.8, target_t, model_out[0], context['player'], context['fen'], model_out[1])
+            #l = composite_loss(0.8, target_t, model_out[0], context['player'], context['fen'], model_out[1])
+            l = basic_loss(target_t, model_out[0])
         
         #model = model_wrapper.model_instance
         #for m in [model.layer_1, model.layer_2]:
