@@ -83,10 +83,10 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
         # l = basic_loss(tf.cast(target_t, tf.float32), model_out[0])
         l = composite_loss(0.8, tf.cast(target_t, tf.float32), model_out[0], context['player'], context['fen'], model_out[1], False)
 
-        for m in [model.layer_1, model.layer_2]:
-            dw, db = grad_tape.gradient(l, [m.w, m.b])
-            m.w.assign_sub(learning_rate * dw)
-            m.b.assign_sub(learning_rate * db)
+    for m in [model.layer_1, model.layer_2]:
+        dw, db = grad_tape.gradient(l, [m.w, m.b])
+        m.w.assign_sub(learning_rate * dw)
+        m.b.assign_sub(learning_rate * db)
     del grad_tape
     return l
 
@@ -96,7 +96,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
             "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             "following_move": "e2e3" }]
     #for e in range(len(data)): _loss = train(model_wrapper, data[e])
-    for e in range(10):
+    for e in range(20):
         print('EPOCH {}:'.format(e))
         _loss = train(model_wrapper, data[0], 0.1)
         print('loss: '+str(_loss.numpy()))
