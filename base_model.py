@@ -45,7 +45,8 @@ class ModelWrapper:
                         max_xyz = [x, y, z] # is x, y orientation correct? TODO
 
         ideal_out = tf.convert_to_tensor(ideal_out)
-        return [tf.reshape(model_out, [2, 8, 8]), tenconv.tensor_to_lan(ideal_out)]
+        t_out = tf.reshape(model_out, [2, 8, 8])
+        return [tf.linalg.normalize(t_out)[0], tenconv.tensor_to_lan(ideal_out)]
 
 MOVE_TREE = open('bin\\inital_dataset_compressed.json', 'r')
 
@@ -75,15 +76,14 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
 
     with tf.GradientTape(persistent=True) as grad_tape:
         model_out = model_wrapper(context['fen'])
+        #print(model_out[0])
         print('model returned move: '+model_out[1])
 
+        # l = basic_loss(tf.cast(target_t, tf.float32), model_out[0])
+        l = composite_loss(0.8, tf.cast(target_t, tf.float32), model_out[0], context['player'], context['fen'], model_out[1], False)
+
         for m in [model.layer_1, model.layer_2]:
-            # l = basic_loss(tf.cast(target_t, tf.float32), model_out[0])
-            l = composite_loss(0.8, tf.cast(target_t, tf.float32), model_out[0], context['player'], context['fen'], model_out[1], False)
-            
             dw, db = grad_tape.gradient(l, [m.w, m.b])
-            #print(dw)
-            
             m.w.assign_sub(learning_rate * dw)
             m.b.assign_sub(learning_rate * db)
     del grad_tape
@@ -96,6 +96,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
             "following_move": "e2e3" }]
     #for e in range(len(data)): _loss = train(model_wrapper, data[e])
     for e in range(10):
+        print('EPOCH {}:'.format(e))
         _loss = train(model_wrapper, data[0], 0.0001)
         print('loss: '+str(_loss.numpy()))
 
