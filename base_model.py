@@ -54,7 +54,7 @@ from base_stockfish import SF # rewrite this, put in CSE class ??
 def composite_loss(omega: float, target_tensor: tf.Tensor, output_tensor: tf.Tensor, player: int, fen: str, move: str, out: bool=True):
     e_sigma_delta = tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor)))
     e_delta_sigma = tf.reduce_sum(target_tensor)**2 - tf.reduce_sum(output_tensor)**2
-    p = 64 # P_max, value tbd
+    p = 128 # P_max, value tbd
     if fen in MOVE_TREE:
         for m in MOVE_TREE[fen][player]:
             if m['move'] == move:
@@ -100,6 +100,8 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
         print('EPOCH {}:'.format(e))
         _loss = train(model_wrapper, data[0], 0.1)
         print('loss: '+str(_loss.numpy()))
+    print('\nfinal tensor:')
+    print(model_wrapper(data[0]['fen']))
 
 
 if __name__ == '__main__':
