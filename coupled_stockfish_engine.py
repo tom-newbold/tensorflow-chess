@@ -11,10 +11,11 @@ class CoupledStockfish:
         self.stockfish_instance = Stockfish(path=STOCKFISH_PATH)
         self.games = []
         try:
-            g = pgn.read_game(open(pgn_path, encoding='utf-8'))
+            f = open(pgn_path, encoding='utf-8')
+            g = pgn.read_game(f)
             while not (g is None):
                 self.games.append(g)
-                g = pgn.read_game(open(pgn_path, encoding='utf-8'))
+                g = pgn.read_game(f)
         except FileNotFoundError:
             self.games = [pgn.read_game(StringIO('1.'))] ## add support for regular json input (need player input)
         self.player = []
@@ -27,8 +28,8 @@ class CoupledStockfish:
                 self.player.append(-1)
         self.output = out
 
-    def make_move(self, move, game_id=0, eval=False):
-        self.games[game_id].board().push(move)
+    def make_move(self, board, move, eval=False):
+        board.push(move)
         self.stockfish_instance.make_moves_from_current_position([move.uci()])
         if eval:
             return self.stockfish_instance.get_evaluation()
@@ -45,7 +46,7 @@ class CoupledStockfish:
             m_san = b.san(m)
             if i%2 == self.player[game_id]: # player turn
                 fen_context = b.fen()
-                eval = self.make_move(m, eval=True)
+                eval = self.make_move(b, m, eval=True)
                 if self.output:
                     if eval['type']=='cp':
                         print(m_san+': '+str(eval['value'])+' centipawns')
@@ -60,7 +61,7 @@ class CoupledStockfish:
                 })
                 ## extract state here and eval position; add to database
             else:
-                self.make_move(m)
+                self.make_move(b, m)
         return (out, b)
 
     def get_sf_board(self):
