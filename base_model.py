@@ -50,21 +50,21 @@ class ModelWrapper:
 MOVE_TREE = open('bin\\inital_dataset_compressed.json', 'r')
 
 from base_stockfish import SF # rewrite this, put in CSE class ??
-def composite_loss(omega: float, target_tensor: tf.Tensor, output_tensor: tf.Tensor, player: int, fen: str, move: str):
+def composite_loss(omega: float, target_tensor: tf.Tensor, output_tensor: tf.Tensor, player: int, fen: str, move: str, out: bool=True):
     e_sigma_delta = tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor)))
     e_delta_sigma = tf.reduce_sum(target_tensor)**2 - tf.reduce_sum(output_tensor)**2
-    p = 128 # P_max, value tbd
+    p = 64 # P_max, value tbd
     if fen in MOVE_TREE:
         for m in MOVE_TREE[fen][player]:
             if m['move'] == move:
-                print('in move tree')
+                if out: print('in move tree')
                 p = omega
     else:
         if SF().check_move(fen, move):
-            print('valid')
+            if out: print('valid')
             p = 1
-        else: print('invalid')
-    return e_sigma_delta * e_delta_sigma * p
+        elif out: print('invalid')
+    return e_sigma_delta * e_delta_sigma * p / (2**20)
 
 def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
     return tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor)))
@@ -78,11 +78,11 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
         print('model returned move: '+model_out[1])
 
         for m in [model.layer_1, model.layer_2]:
-            # grad_tape.watch([m.w, m.b])
-            #l = basic_loss(tf.cast(target_t, tf.float32), model_out[0])
-            l = composite_loss(0.8, tf.cast(target_t, tf.float32), model_out[0], context['player'], context['fen'], model_out[1])
+            # l = basic_loss(tf.cast(target_t, tf.float32), model_out[0])
+            l = composite_loss(0.8, tf.cast(target_t, tf.float32), model_out[0], context['player'], context['fen'], model_out[1], False)
             
-            dw, db = grad_tape.gradient(l, [m.w, m.b]) # <- TODO THIS IS THE ERROR
+            dw, db = grad_tape.gradient(l, [m.w, m.b])
+            #print(dw)
             
             m.w.assign_sub(learning_rate * dw)
             m.b.assign_sub(learning_rate * db)
@@ -96,8 +96,8 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
             "following_move": "e2e3" }]
     #for e in range(len(data)): _loss = train(model_wrapper, data[e])
     for e in range(10):
-        _loss = train(model_wrapper, data[0])
-        print(_loss)
+        _loss = train(model_wrapper, data[0], 0.0001)
+        print('loss: '+str(_loss.numpy()))
 
 
 if __name__ == '__main__':
