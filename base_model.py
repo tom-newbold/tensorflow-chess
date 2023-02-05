@@ -27,7 +27,7 @@ class ModelWrapper:
     def __init__(self):
         self.model_instance = TwoLayerModel(name='model_instanace')
 
-    def __call__(self, fen: str) -> list[tf.Tensor, str]:
+    def __call__(self, fen: str) -> list[tf.Tensor, str]: # TODO REMOVE NUMPY FUNC
         t_in = tenconv.fen_to_tensor(fen).numpy()
         model_in = tf.constant([[t_in[x, y] for x in range(8) for y in range(8)]]) # convert to column vector
         model_out = self.model_instance(model_in) # pass into module
@@ -69,26 +69,24 @@ def composite_loss(omega: float, target_tensor: tf.Tensor, output_tensor: tf.Ten
             print('valid')
             p = 1
         else: print('invalid')
-    return e_sigma_delta * e_delta_sigma * p # THIS FUNCTION CANNOT USE NUMPY OPERATIONS OR GRAD WILL BE ZERO
+    return e_sigma_delta * e_delta_sigma * p
 
 def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
-    return tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor)))#.numpy().item() # add .item() to composite_loss
+    return tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor)))
 
 def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], learning_rate: float=0.1) -> float:
+    model = model_wrapper.model_instance
     target_t = tenconv.lan_to_tensor(context['following_move'])
 
     with tf.GradientTape(persistent=True) as grad_tape:
         model_out = model_wrapper(context['fen'])
         print('model returned move: '+model_out[1])
 
-        model = model_wrapper.model_instance
         for m in [model.layer_1, model.layer_2]:
             # grad_tape.watch([m.w, m.b])
             #l = composite_loss(0.8, target_t, model_out[0], context['player'], context['fen'], model_out[1])
             l = basic_loss(target_t, model_out[0])
             
-            #model = model_wrapper.model_instance
-            #for m in [model.layer_1, model.layer_2]:
             dw, db = grad_tape.gradient(l, [m.w, m.b]) # <- TODO THIS IS THE ERROR
             print('weight grad: '+str(dw))
             
