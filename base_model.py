@@ -65,7 +65,7 @@ def composite_loss(omega: float, target_tensor: tf.Tensor, output_tensor: tf.Ten
             if out: print('valid')
             p = 1
         elif out: print('invalid')
-    return e_sigma_delta * e_delta_sigma * p / (2**20)
+    return tf.abs(e_sigma_delta * e_delta_sigma * p) # remove abs??
 
 def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
     return tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor)))
@@ -78,6 +78,7 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
         model_out = model_wrapper(context['fen'])
         #print(model_out[0])
         print('model returned move: '+model_out[1])
+        if SF().check_move(context['fen'], model_out[1]): print('valid') # TODO remove this line after testing
 
         # l = basic_loss(tf.cast(target_t, tf.float32), model_out[0])
         l = composite_loss(0.8, tf.cast(target_t, tf.float32), model_out[0], context['player'], context['fen'], model_out[1], False)
@@ -97,7 +98,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
     #for e in range(len(data)): _loss = train(model_wrapper, data[e])
     for e in range(10):
         print('EPOCH {}:'.format(e))
-        _loss = train(model_wrapper, data[0], 0.0001)
+        _loss = train(model_wrapper, data[0], 0.1)
         print('loss: '+str(_loss.numpy()))
 
 
