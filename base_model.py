@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import tensor_conversions.tensor_conversions as tenconv
+import json
 
 class Layer(tf.Module):
     def __init__(self, nodes_in, nodes_out, name=None):
@@ -70,12 +71,37 @@ def composite_loss(omega, target_tensor, output_tensor, player, fen, move):
         else: print('invalid')
     return e_sigma_delta * e_delta_sigma * p
 
+def train(model_wrapper, context, learning_rate=0.1):
+    target_t = tenconv.lan_to_tensor(context['following_move'])
+    model_out = model_wrapper(context['fen'])
+    l = composite_loss(0.8, target_t, model_out[0], context['player'], context['fen'], model_out[1])
+    m = model_wrapper.model_instance
+    dw, db = tf.GradientTape().gradient(l, [m.w, m.b])
+    m.w.assign_sub(learning_rate * dw)
+    m.b.assign_sub(learning_rate * db)
+    return l
+
+def train_loop(model_wrapper, data):
+    data = [{
+            "player": 0,
+            "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            "following_move": "e2e3" }]
+    #for e in range(len(data)):
+    for e in range(20):
+        _loss = train(model_wrapper, data[0])
+        print(_loss)
+    return
+
 
 if __name__ == '__main__':
-    model = ModelWrapper()
+    model_wrap = ModelWrapper()
     print('model initialised')
+    '''
     test_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
     out = model(test_fen) # should return opening when trained
     print(out[1])
     l = composite_loss(0.8, tenconv.lan_to_tensor('e2e4'), out[0], 0, test_fen, out[1])
     print(l)
+    '''
+    #data = json.load(open('bin\\inital_dataset.json','r'))['data_points']
+    train_loop(model_wrap, [])
