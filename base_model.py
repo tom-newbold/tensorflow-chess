@@ -30,19 +30,18 @@ class ModelWrapper:
     def __call__(self, fen: str) -> list[tf.Tensor, str]: # TODO REMOVE NUMPY FUNC
         t_in = tenconv.fen_to_tensor(fen)
         model_out = self.model_instance(tf.reshape(t_in, [1, 64])) # pass into module
+        slices = [model_out[0][0:64], model_out[0][64:128]]
+        max = [tf.reduce_max(slices[0]), tf.reduce_max(slices[1])]
+        ideal_out = np.zeros((128)) # TODO check this is correct orientation
         for z in range(2): # convert back to tensor, generate ideal tensor
-            max = -1
-            max_xyz = [-1, -1, -1]
-            for y in range(8):
-                for x in range(8):
-                    e = model_out[0][z*64 + y*8 + x]
-                    if e > max:
-                        max = e
-                        max_xyz = [x, y, z] # is x, y orientation correct? TODO
-        ideal_out = np.zeros((2, 8, 8))
-        ideal_out[max_xyz[2]][max_xyz[1]][max_xyz[0]] = 1
+            s = slices[z]
+            for i in range(64):
+                if s[i] == max[z]:
+                    ideal_out[64*z + i] = 1
+                    break
         ideal_out = tf.convert_to_tensor(ideal_out)
-        t_out = tf.reshape(model_out, [2, 8, 8])
+        ideal_out = tf.reshape(ideal_out, (2, 8, 8))
+        t_out = tf.reshape(model_out, (2, 8, 8))
         return [tf.linalg.normalize(t_out)[0], tenconv.tensor_to_lan(ideal_out)]
 
 MOVE_TREE = open('bin\\inital_dataset_compressed.json', 'r')
