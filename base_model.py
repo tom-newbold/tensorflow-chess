@@ -30,20 +30,17 @@ class ModelWrapper:
     def __call__(self, fen: str) -> list[tf.Tensor, str]: # TODO REMOVE NUMPY FUNC
         t_in = tenconv.fen_to_tensor(fen)
         model_out = self.model_instance(tf.reshape(t_in, [1, 64])) # pass into module
-        ideal_out = np.zeros((2, 8, 8))
         for z in range(2): # convert back to tensor, generate ideal tensor
             max = -1
             max_xyz = [-1, -1, -1]
             for y in range(8):
                 for x in range(8):
-                    i = z*64 + y*8 + x
-                    e = model_out[0][i]
+                    e = model_out[0][z*64 + y*8 + x]
                     if e > max:
                         max = e
-                        ideal_out[max_xyz[2]][max_xyz[1]][max_xyz[0]] = 0
-                        ideal_out[z][y][x] = 1
                         max_xyz = [x, y, z] # is x, y orientation correct? TODO
-
+        ideal_out = np.zeros((2, 8, 8))
+        ideal_out[max_xyz[2]][max_xyz[1]][max_xyz[0]] = 1
         ideal_out = tf.convert_to_tensor(ideal_out)
         t_out = tf.reshape(model_out, [2, 8, 8])
         return [tf.linalg.normalize(t_out)[0], tenconv.tensor_to_lan(ideal_out)]
