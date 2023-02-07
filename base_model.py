@@ -70,7 +70,7 @@ def learning_curve(x: float) -> float:
     return x
 
 def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.1) -> float:
-    print('jitter scale: '+str(t.numpy()))
+    print('jitter scale: '+str(t))
     model = model_wrapper.model_instance
     target_t = tenconv.lan_to_tensor(context['following_move'])
 
@@ -101,7 +101,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float
     for e in range(20):
         print('\nEPOCH {}:'.format(e))
         t = inital_time + delta_time*float(e)
-        _loss = train(model_wrapper, data[0], tf.math.exp(-t), 0.1)
+        _loss = train(model_wrapper, data[0], 1.5-t, 0.1) # tf.math.exp(-t).numpy()
         print('loss: '+str(_loss.numpy()))
     print('\nfinal tensor:')
     print(model_wrapper(data[0]['fen'])[0])
