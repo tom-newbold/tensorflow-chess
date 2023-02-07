@@ -66,7 +66,10 @@ def composite_loss(omega: float, target_tensor: tf.Tensor, output_tensor: tf.Ten
 def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
     return tf.reduce_sum(tf.square(tf.subtract(target_tensor, output_tensor)))
 
-def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], learning_rate: float=0.1) -> float:
+def learning_curve(x: float) -> float:
+    return x
+
+def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], temp: float, learning_rate: float=0.1) -> float:
     model = model_wrapper.model_instance
     target_t = tenconv.lan_to_tensor(context['following_move'])
 
@@ -81,12 +84,15 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
 
     for m in [model.layer_1, model.layer_2]:
         dw, db = grad_tape.gradient(l, [m.w, m.b])
-        m.w.assign_sub(learning_rate * dw)
-        m.b.assign_sub(learning_rate * db)
+        jitter_tensor = tf.nomralise(tf.random.normal(dw.shape))
+        dw.assign_add(jitter_tensor*temp)
+        m.w.assign_sub(learning_curve(learning_rate) * dw)
+        db.assign_add(jitter_tensor*temp)
+        m.b.assign_sub(learning_curve(learning_rate) * db)
     del grad_tape
     return l
 
-def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
+def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_temp: float=1) -> None:
     data = [{
             "player": 0,
             "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -94,7 +100,8 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict]) -> None:
     #for e in range(len(data)): _loss = train(model_wrapper, data[e])
     for e in range(20):
         print('EPOCH {}:'.format(e))
-        _loss = train(model_wrapper, data[0], 0.1)
+        t = e*inital_temp / 20
+        _loss = train(model_wrapper, data[0], e**(-t), 0.1)
         print('loss: '+str(_loss.numpy()))
     print('\nfinal tensor:')
     print(model_wrapper(data[0]['fen'])[0])
