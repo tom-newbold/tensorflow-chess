@@ -70,13 +70,12 @@ def learning_curve(x: float) -> float:
     return x
 
 def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.1) -> float:
-    print('jitter scale: '+str(t.numpy()))
+    #print('jitter scale: '+str(t.numpy()))
     model = model_wrapper.model_instance
     target_t = tenconv.lan_to_tensor(context['following_move'])
 
     with tf.GradientTape(persistent=True) as grad_tape:
         model_out = model_wrapper(context['fen'])
-        #print(model_out[0])
         print('model returned move: '+model_out[1])
         if SF().check_move(context['fen'], model_out[1]): print('valid') # TODO remove this line after testing
 
@@ -86,7 +85,7 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
     for m in [model.layer_1, model.layer_2]:
         dw, db = grad_tape.gradient(l, [m.w, m.b])
         jitter_tensors = [tf.linalg.normalize(tf.random.normal(_d.shape))[0] for _d in [dw, db]]
-        scaled_jitter_tensors = [tf.math.multiply(_jt, t) for _jt in jitter_tensors]
+        scaled_jitter_tensors = [tf.math.multiply(_jt, l) for _jt in jitter_tensors] # <- related to loss?
         m.w.assign_sub(learning_curve(learning_rate) * (dw + scaled_jitter_tensors[0]))
         m.b.assign_sub(learning_curve(learning_rate) * (db + scaled_jitter_tensors[1]))
         
