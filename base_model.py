@@ -84,7 +84,7 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
 
     for m in [model.layer_1, model.layer_2]:
         dw, db = grad_tape.gradient(l, [m.w, m.b])
-        jitter_tensors = [tf.linalg.normalize(tf.random.normal(_d.shape)) for _d in [dw, db]]
+        jitter_tensors = [tf.linalg.normalize(tf.random.normal(_d.shape))[0] for _d in [dw, db]]
         scaled_jitter_tensors = [tf.math.multiply(_jt, temp) for _jt in jitter_tensors]
         m.w.assign_sub(learning_curve(learning_rate) * (dw + scaled_jitter_tensors[0]))
         m.b.assign_sub(learning_curve(learning_rate) * (db + scaled_jitter_tensors[1]))
@@ -100,8 +100,8 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_temp: float
     #for e in range(len(data)): _loss = train(model_wrapper, data[e])
     for e in range(20):
         print('EPOCH {}:'.format(e))
-        t = e*inital_temp / 20
-        _loss = train(model_wrapper, data[0], e**(-t), 0.1)
+        t = inital_temp + float(e)
+        _loss = train(model_wrapper, data[0], tf.math.exp(-t), 0.1)
         print('loss: '+str(_loss.numpy()))
     print('\nfinal tensor:')
     print(model_wrapper(data[0]['fen'])[0])
