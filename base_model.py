@@ -70,7 +70,7 @@ def learning_curve(x: float) -> float:
     return x
 
 def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.1) -> float:
-    #print('jitter scale: '+str(t.numpy()))
+    print('jitter scale: '+str(t.numpy()))
     model = model_wrapper.model_instance
     target_t = tenconv.lan_to_tensor(context['following_move'])
 
@@ -85,7 +85,7 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
     for m in [model.layer_1, model.layer_2]:
         dw, db = grad_tape.gradient(l, [m.w, m.b])
         jitter_tensors = [tf.linalg.normalize(tf.random.normal(_d.shape))[0] for _d in [dw, db]]
-        scaled_jitter_tensors = [tf.math.multiply(_jt, l) for _jt in jitter_tensors] # <- related to loss?
+        scaled_jitter_tensors = [tf.math.multiply(_jt, l*t) for _jt in jitter_tensors]
         m.w.assign_sub(learning_curve(learning_rate) * (dw + scaled_jitter_tensors[0]))
         m.b.assign_sub(learning_curve(learning_rate) * (db + scaled_jitter_tensors[1]))
         
@@ -118,4 +118,4 @@ if __name__ == '__main__':
     print(l)
     '''
     #data = json.load(open('bin\\inital_dataset.json','r'))['data_points']
-    train_loop(model_wrap, [], -10, 2)
+    train_loop(model_wrap, [], 0, 0.05)
