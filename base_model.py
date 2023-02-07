@@ -70,6 +70,7 @@ def learning_curve(x: float) -> float:
     return x
 
 def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.1) -> float:
+    print('jitter scale: '+str(t.numpy()))
     model = model_wrapper.model_instance
     target_t = tenconv.lan_to_tensor(context['following_move'])
 
