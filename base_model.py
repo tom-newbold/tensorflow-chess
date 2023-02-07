@@ -69,7 +69,7 @@ def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
 def learning_curve(x: float) -> float:
     return x
 
-def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], temp: float, learning_rate: float=0.1) -> float:
+def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.1) -> float:
     model = model_wrapper.model_instance
     target_t = tenconv.lan_to_tensor(context['following_move'])
 
@@ -85,22 +85,22 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
     for m in [model.layer_1, model.layer_2]:
         dw, db = grad_tape.gradient(l, [m.w, m.b])
         jitter_tensors = [tf.linalg.normalize(tf.random.normal(_d.shape))[0] for _d in [dw, db]]
-        scaled_jitter_tensors = [tf.math.multiply(_jt, temp) for _jt in jitter_tensors]
+        scaled_jitter_tensors = [tf.math.multiply(_jt, t) for _jt in jitter_tensors]
         m.w.assign_sub(learning_curve(learning_rate) * (dw + scaled_jitter_tensors[0]))
         m.b.assign_sub(learning_curve(learning_rate) * (db + scaled_jitter_tensors[1]))
         
     del grad_tape
     return l
 
-def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_temp: float=1) -> None:
+def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float=0, delta_time: float=1) -> None:
     data = [{
             "player": 0,
             "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             "following_move": "e2e3" }]
     #for e in range(len(data)): _loss = train(model_wrapper, data[e])
     for e in range(20):
-        print('EPOCH {}:'.format(e))
-        t = inital_temp + float(e)
+        print('\nEPOCH {}:'.format(e))
+        t = inital_time + delta_time*float(e)
         _loss = train(model_wrapper, data[0], tf.math.exp(-t), 0.1)
         print('loss: '+str(_loss.numpy()))
     print('\nfinal tensor:')
@@ -118,4 +118,4 @@ if __name__ == '__main__':
     print(l)
     '''
     #data = json.load(open('bin\\inital_dataset.json','r'))['data_points']
-    train_loop(model_wrap, [])
+    train_loop(model_wrap, [], -10, 2)
