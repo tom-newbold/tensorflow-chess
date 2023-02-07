@@ -84,11 +84,9 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
 
     for m in [model.layer_1, model.layer_2]:
         dw, db = grad_tape.gradient(l, [m.w, m.b])
-        jitter_tensor = tf.nomralise(tf.random.normal(dw.shape))
-        dw.assign_add(jitter_tensor*temp)
-        m.w.assign_sub(learning_curve(learning_rate) * dw)
-        db.assign_add(jitter_tensor*temp)
-        m.b.assign_sub(learning_curve(learning_rate) * db)
+        jitter_tensor = tf.linalg.normalize(tf.random.normal(dw.shape))
+        m.w.assign_sub(learning_curve(learning_rate) * (dw + tf.math.multipy(jitter_tensor, temp)))
+        m.b.assign_sub(learning_curve(learning_rate) * (db + tf.math.multipy(jitter_tensor, temp)))
     del grad_tape
     return l
 
