@@ -70,8 +70,9 @@ def learning_curve(x: float) -> float:
     return x
 
 def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.1) -> float:
-    print('jitter scale: '+str(t))
+    #print('jitter scale: '+str(t))
     model = model_wrapper.model_instance
+    print(context)
     target_t = tenconv.lan_to_tensor(context['following_move'])
 
     with tf.GradientTape(persistent=True) as grad_tape:
@@ -93,11 +94,16 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
     return l
 
 def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float=0, delta_time: float=1) -> None:
+    for e in range(len(data)):
+        _loss = train(model_wrapper, data[e], 1) # t=1 just uses loss scaling on jitter
+        print('\nEPOCH {}:'.format(e))
+    
+    ''' # Test Loop
     data = [{
             "player": 0,
             "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             "following_move": "e2e3" }]
-    #for e in range(len(data)): _loss = train(model_wrapper, data[e])
+
     for e in range(20):
         print('\nEPOCH {}:'.format(e))
         t = inital_time + delta_time*float(e)
@@ -105,6 +111,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float
         print('loss: '+str(_loss.numpy()))
     print('\nfinal tensor:')
     print(model_wrapper(data[0]['fen'])[0])
+    '''
 
 
 if __name__ == '__main__':
@@ -117,5 +124,15 @@ if __name__ == '__main__':
     l = composite_loss(0.8, tenconv.lan_to_tensor('e2e4'), out[0], 0, test_fen, out[1])
     print(l)
     '''
-    #data = json.load(open('bin\\inital_dataset.json','r'))['data_points']
-    train_loop(model_wrap, [], 0, 0.05)
+    
+    #train_loop(model_wrap, [], 0, 0.05)
+    data = json.load(open('bin\\inital_dataset.json','r'))['data_points']
+    train_loop(model_wrap, data)
+
+    while True:
+        fen = input('fen string:')
+        if fen.lower()[0] == 'e':
+            # add saving functionality here
+            break
+        else:
+            print('returned move: '+model_wrap(fen)[0])
