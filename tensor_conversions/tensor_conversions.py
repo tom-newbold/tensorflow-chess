@@ -26,7 +26,7 @@ def fen_to_tensor(fen_string: str) -> tf.Tensor:
 
 def lan_to_tensor(lan_string: str) -> tf.Tensor:
     a = np.zeros((2, 8, 8))
-    s = [lan_string[:2], lan_string[2:]]
+    s = [lan_string[:2], lan_string[-2:]]
     for i in range(2):
         a[i, 8-int(s[i][1]), 'abcdefgh'.index(s[i][0])] = 1
     return tf.convert_to_tensor(a)
@@ -42,3 +42,4 @@ def tensor_to_lan(tensor: tf.Tensor) -> str:
     return out
 
 #print(tensor_to_lan(lan_to_tensor('a1h8')))
+#print(tensor_to_lan(lan_to_tensor('a1-h8')))
