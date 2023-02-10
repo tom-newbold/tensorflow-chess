@@ -26,7 +26,12 @@ def fen_to_tensor(fen_string: str) -> tf.Tensor:
 
 def lan_to_tensor(lan_string: str) -> tf.Tensor:
     a = np.zeros((2, 8, 8))
-    s = [lan_string[:2], lan_string[-2:]]
+    lan_string = lan_string.strip('+')
+    if '-' in lan_string:
+        lan_string = lan_string.split('-')
+    elif 'x' in lan_string:
+        lan_string = lan_string.split('x')
+    s = [lan_string[0][-2:], lan_string[1]]
     for i in range(2):
         a[i, 8-int(s[i][1]), 'abcdefgh'.index(s[i][0])] = 1
     return tf.convert_to_tensor(a)
@@ -39,7 +44,7 @@ def tensor_to_lan(tensor: tf.Tensor) -> str:
             for x in range(8):
                 if t[d][y][x] == 1:
                     out += 'abcdefgh'[x] + str(8-y)
-    return out
+    return out # no prefix/capture consideration?
 
 #print(tensor_to_lan(lan_to_tensor('a1h8')))
 #print(tensor_to_lan(lan_to_tensor('a1-h8')))
