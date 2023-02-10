@@ -1,16 +1,17 @@
 import json
 
 out_json = {}
-j = json.load(open('bin\\inital_dataset.json','r'))
+j = json.load(open('bin\\out.json','r'))
 l = len(j['data_points'])
 
 for i in range(l):
     dp = j['data_points'][i]
-    print(str(i)+'/'+str(l))
+    print(str(i)+'/'+str(l), end='\r')
     fen = dp['fen']
     move = {
         'move':dp['following_move'],
-        'eval':dp['resulting_eval']
+        'eval':dp['resulting_eval'],
+        'game_time':dp['game_time']
     }
     if fen not in out_json.keys():
         out_json[fen] = [[],[]]
@@ -23,5 +24,5 @@ for fen in list(out_json):
         out_json.pop(fen)
 
 
-with open('bin\\inital_dataset_compressed.json', 'w') as file:
+with open('bin\\out_compressed.json', 'w') as file:
     json.dump(out_json, file)
