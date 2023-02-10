@@ -42,7 +42,7 @@ class ModelWrapper:
         ideal_out = tf.convert_to_tensor(ideal_out)
         ideal_out = tf.reshape(ideal_out, (2, 8, 8))
         t_out = tf.reshape(model_out, (2, 8, 8))
-        return [tf.linalg.normalize(t_out)[0], tenconv.tensor_to_lan(ideal_out)]
+        return [tf.linalg.normalize(t_out)[0], tenconv.tensor_to_lan(ideal_out)] # MODEL HAS NO CONCEPT OF PLAYER TODO
 
 MOVE_TREE = open('bin\\inital_dataset_compressed.json', 'r')
 
