@@ -126,7 +126,7 @@ if __name__ == '__main__':
     '''
     
     #train_loop(model_wrap, [], 0, 0.05)
-    data = json.load(open('bin\\inital_dataset.json','r'))['data_points']
+    data = json.load(open('bin\\out.json','r'))['data_points']
     train_loop(model_wrap, data)
 
     while True:
