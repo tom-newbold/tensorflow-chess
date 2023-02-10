@@ -14,7 +14,7 @@ while len(r) == 0:
         m = 12
 
 
-MAX_GAMES = 50 # truncate list at number of games
+MAX_GAMES = 10 # truncate list at number of games
 if len(r) > MAX_GAMES:
     r = r[-MAX_GAMES:]
 
@@ -30,7 +30,7 @@ for i in range(len(r)): # iterate over games from api
 
     sf = cse.CoupledStockfish('bin\\temp.pgn', 'The111thTom', out=False)
     states, b = sf.run()
-    p = sf.player
+    p = sf.player[0]
     for s in states: # add all states to output json
         _state = {
             'player': p,
