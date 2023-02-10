@@ -135,4 +135,7 @@ if __name__ == '__main__':
             # add saving functionality here
             break
         else:
-            print('returned move: '+model_wrap(fen)[0])
+            try: 
+                #print(model_wrap(fen)[0])
+                print('returned move: '+model_wrap(fen)[1])
+            except: pass
