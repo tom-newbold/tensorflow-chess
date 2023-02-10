@@ -27,9 +27,9 @@ class ModelWrapper:
     def __init__(self):
         self.model_instance = TwoLayerModel(name='model_instanace')
 
-    def __call__(self, fen: str) -> list[tf.Tensor, str]: # TODO REMOVE NUMPY FUNC
+    def __call__(self, fen: str, player: int) -> list[tf.Tensor, str]:
         t_in = tenconv.fen_to_tensor(fen)
-        model_out = self.model_instance(tf.reshape(t_in, [1, 64])) # pass into module
+        model_out = self.model_instance(tf.reshape(t_in, [1, 64])) # TODO PASS PLAYER IN HERE
         slices = [model_out[0][0:64], model_out[0][64:128]]
         max = [tf.reduce_max(slices[0]), tf.reduce_max(slices[1])]
         ideal_out = np.zeros((128)) # TODO check this is correct orientation
@@ -42,7 +42,7 @@ class ModelWrapper:
         ideal_out = tf.convert_to_tensor(ideal_out)
         ideal_out = tf.reshape(ideal_out, (2, 8, 8))
         t_out = tf.reshape(model_out, (2, 8, 8))
-        return [tf.linalg.normalize(t_out)[0], tenconv.tensor_to_lan(ideal_out)] # MODEL HAS NO CONCEPT OF PLAYER TODO
+        return [tf.linalg.normalize(t_out)[0], tenconv.tensor_to_lan(ideal_out)]
 
 MOVE_TREE = open('bin\\inital_dataset_compressed.json', 'r')
 
@@ -73,7 +73,7 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
     #print('jitter scale: '+str(t))
     model = model_wrapper.model_instance
     print(context)
-    target_t = tenconv.lan_to_tensor(context['following_move'])
+    target_t = tenconv.lan_to_tensor(context['following_move'], context['player'])
 
     with tf.GradientTape(persistent=True) as grad_tape:
         model_out = model_wrapper(context['fen'])
