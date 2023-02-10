@@ -44,8 +44,8 @@ class CoupledStockfish:
         b = self.games[game_id].board()
         for i in range(len(mline)):
             m = mline[i]
-            m_san = b.lan(m)
-            m_lan = b.san(m)
+            m_san = b.san(m)
+            m_lan = b.lan(m)
             if i%2 == self.player[game_id]: # player turn
                 fen_context = b.fen()
                 eval = self.make_move(b, m, eval=True)
