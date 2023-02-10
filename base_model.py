@@ -27,7 +27,7 @@ class ModelWrapper:
     def __init__(self):
         self.model_instance = TwoLayerModel(name='model_instanace')
 
-    def __call__(self, fen: str, player: int) -> list[tf.Tensor, str]:
+    def __call__(self, fen: str) -> list[tf.Tensor, str]:
         t_in = tenconv.fen_to_tensor(fen)
         model_out = self.model_instance(tf.reshape(t_in, [1, 64])) # TODO PASS PLAYER IN HERE
         slices = [model_out[0][0:64], model_out[0][64:128]]
