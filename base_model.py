@@ -16,7 +16,7 @@ class Layer(tf.Module):
 class TwoLayerModel(tf.Module):
     def __init__(self, name: str=None):
         super().__init__(name=name)
-        self.layer_1 = Layer(64, 128)
+        self.layer_1 = Layer(65, 128)
         self.layer_2 = Layer(128, 128)
     
     def __call__(self, x: tf.Tensor) -> tf.Tensor:
@@ -28,8 +28,10 @@ class ModelWrapper:
         self.model_instance = TwoLayerModel(name='model_instanace')
 
     def __call__(self, fen: str) -> list[tf.Tensor, str]:
-        t_in = tenconv.fen_to_tensor(fen)
-        model_out = self.model_instance(tf.reshape(t_in, [1, 64])) # TODO PASS PLAYER IN HERE
+        position_ten, player = tenconv.fen_to_tensor(fen)
+        row_tensor = tf.reshape(position_ten, [1, 64])
+        player_tensor = tf.cast(tf.constant([[player]]), dtype=tf.float32)
+        model_out = self.model_instance(tf.concat([row_tensor, player_tensor], 1)) # TODO PASS PLAYER IN HERE
         slices = [model_out[0][0:64], model_out[0][64:128]]
         max = [tf.reduce_max(slices[0]), tf.reduce_max(slices[1])]
         ideal_out = np.zeros((128)) # TODO check this is correct orientation
@@ -94,9 +96,11 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
     return l
 
 def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float=0, delta_time: float=1) -> None:
-    for e in range(len(data)):
-        _loss = train(model_wrapper, data[e], 1) # t=1 just uses loss scaling on jitter
-        print('\nEPOCH {}:'.format(e))
+    for _ in range(10):
+        print('PASS {}'.format(_))
+        for e in range(len(data)):
+            _loss = train(model_wrapper, data[e], 1) # t=1 just uses loss scaling on jitter
+            print('\nEPOCH {}:'.format(e))
     
     ''' # Test Loop
     data = [{
@@ -127,7 +131,7 @@ if __name__ == '__main__':
     
     #train_loop(model_wrap, [], 0, 0.05)
     data = json.load(open('bin\\out.json','r'))['data_points']
-    train_loop(model_wrap, data)
+    train_loop(model_wrap, data[:100])
 
     while True:
         fen = input('fen string:')
