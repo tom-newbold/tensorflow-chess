@@ -1,10 +1,13 @@
 import tensorflow as tf
 import numpy as np
 
-def fen_to_tensor(fen_string: str) -> tf.Tensor:
+def fen_to_tensor(fen_string: str) -> list[tf.Tensor, int]:
     map = { 'p':1, 'n':2, 'b':3, 'r':4, 'q':5, 'k':6 }
     array = np.zeros((8,8))
-    rows = fen_string.split(' ')[0].split('/')
+    fen_string = fen_string.split(' ')
+    rows = fen_string[0].split('/')
+    if fen_string[1] not in ['w','b']: raise ValueError('incorrectly reading player from fen string')
+    player = 0 if fen_string[1] == 'w' else 0
     for y in range(8):
         for x in range(8):
             piece = rows[y][x]
@@ -19,8 +22,8 @@ def fen_to_tensor(fen_string: str) -> tf.Tensor:
                 val = map[piece.lower()]
                 array[x, y] = val if piece.isupper() else -val
     #output = tf.Variable(tf.zeros([8, 8], tf.int32))
-    output = tf.convert_to_tensor(array.transpose())
-    return output
+    output = tf.convert_to_tensor(array.transpose(), dtype=tf.float32)
+    return (output, player)
 
 #print(fen_to_tensor("r1bq2nr/2pk1Bpp/p4p2/np2p3/1P3P2/PQP1P2P/6P1/R1B1K1NR w KQ - 3 14"))
 
