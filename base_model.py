@@ -53,7 +53,7 @@ class ModelWrapper:
         position_ten, player = tenconv.fen_to_tensor(fen)
         row_tensor = tf.reshape(position_ten, [1, 64])
         player_tensor = tf.cast(tf.constant([[player]]), dtype=tf.float32)
-        model_out = self.model_instance(tf.concat([row_tensor, player_tensor], 1)) # TODO PASS PLAYER IN HERE
+        model_out = self.model_instance(tf.concat([row_tensor, player_tensor], 1))
         slices = [model_out[0][0:64], model_out[0][64:128]]
         max = [tf.reduce_max(slices[0]), tf.reduce_max(slices[1])]
         ideal_out = np.zeros((128)) # TODO check this is correct orientation
@@ -93,7 +93,7 @@ def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
 def learning_curve(x: float) -> float:
     return x
 
-def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.1, jitter: bool=True) -> float:
+def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.5, jitter: bool=True) -> float:
     #print('jitter scale: '+str(t))
     model = model_wrapper.model_instance
     #print(context)
