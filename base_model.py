@@ -93,9 +93,8 @@ def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
 def learning_curve(x: float) -> float:
     return x
 
-def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.1) -> float:
+def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.1, jitter: bool=True) -> float:
     #print('jitter scale: '+str(t))
-    jitter = False
     model = model_wrapper.model_instance
     #print(context)
     target_t = tenconv.lan_to_tensor(context['following_move'], context['player'])
@@ -122,12 +121,13 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
     del grad_tape
     return loss
 
-def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float=0, delta_time: float=1) -> None:
+def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float=0.0, delta_time: float=1.0) -> None:
+    t = inital_time
     for p in range(5):
-        print('PASS {}'.format(p))
         for e in range(len(data)):
-            _loss = train(model_wrapper, data[e], 1) # t=1 just uses loss scaling on jitter
-            print('\nEPOCH {}:'.format(e))
+            _loss = train(model_wrapper, data[e], tf.math.exp(-t).numpy()) # t=1 just uses loss scaling on jitter
+            print('PASS {0} - EPOCH {1}:'.format(p, e))
+            t += delta_time
     
     ''' # Test Loop
     data = [{
@@ -158,7 +158,8 @@ if __name__ == '__main__':
     
     #train_loop(model_wrap, [], 0, 0.05)
     data = json.load(open('bin\\out.json','r'))['data_points']
-    train_loop(model_wrap, data[:100])
+    train_loop(model_wrap, data[:100], delta_time=0.009)
+    # ln( final scaling ) / loop count ; 4.6/500 ~ 0.009
 
     while True:
         fen = input('fen string:')
