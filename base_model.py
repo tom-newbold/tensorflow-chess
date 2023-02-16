@@ -13,19 +13,41 @@ class Layer(tf.Module):
         y = tf.linalg.matmul(tf.cast(x, tf.float32), self.w) + self.b
         return tf.nn.relu(y)
 
-class TwoLayerModel(tf.Module):
+class SuperModel(tf.Module):
     def __init__(self, name: str=None):
         super().__init__(name=name)
-        self.layer_1 = Layer(65, 128)
-        self.layer_2 = Layer(128, 128)
-    
+        self.layers = []
+
     def __call__(self, x: tf.Tensor) -> tf.Tensor:
-        _x = self.layer_1(x)
-        return self.layer_2(_x)
+        for layer in self.layers:
+            x = layer(x)
+        return x
+
+class TwoLayerModel(SuperModel):
+    def __init__(self, in_nodes: int=64, hidden_nodes: int=192, out_nodes: int=128, name: str=None):
+        super().__init__(name=name)
+        self.layers.append(Layer(in_nodes, hidden_nodes))
+        self.layers.append(Layer(hidden_nodes, out_nodes))
+
+        #return self.layer[1](y)
+
+class ThreeLayerModel(SuperModel):
+    def __init__(self, in_nodes: int=64, hidden_nodes: int=96, out_nodes: int=128, name: str=None):
+        super().__init__(name=name)
+        self.layers.append(Layer(in_nodes, hidden_nodes))
+        self.layers.append(Layer(hidden_nodes, hidden_nodes))
+        self.layers.append(Layer(hidden_nodes, out_nodes))
+    
+    '''
+    def __call__(self, x: tf.Tensor) -> tf.Tensor:
+        y = self.layer_1(x)
+        z = self.layer_2(y)
+        return self.layer_3(z)
+    '''
 
 class ModelWrapper:
     def __init__(self):
-        self.model_instance = TwoLayerModel(name='model_instanace')
+        self.model_instance = TwoLayerModel(in_nodes=65, out_nodes=128, name='model_instanace')
 
     def __call__(self, fen: str) -> list[tf.Tensor, str]:
         position_ten, player = tenconv.fen_to_tensor(fen)
@@ -73,31 +95,36 @@ def learning_curve(x: float) -> float:
 
 def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.1) -> float:
     #print('jitter scale: '+str(t))
+    jitter = False
     model = model_wrapper.model_instance
-    print(context)
+    #print(context)
     target_t = tenconv.lan_to_tensor(context['following_move'], context['player'])
 
     with tf.GradientTape(persistent=True) as grad_tape:
         model_out = model_wrapper(context['fen'])
         print('model returned move: '+model_out[1])
-        if SF().check_move(context['fen'], model_out[1]): print('valid') # TODO remove this line after testing
+        ## if SF().check_move(context['fen'], model_out[1]): print('valid') # TODO remove this line after testing
 
         # l = basic_loss(tf.cast(target_t, tf.float32), model_out[0])
-        l = composite_loss(0.8, tf.cast(target_t, tf.float32), model_out[0], context['player'], context['fen'], model_out[1], False)
+        loss = composite_loss(0.8, tf.cast(target_t, tf.float32), model_out[0], context['player'], context['fen'], model_out[1], False)
 
-    for m in [model.layer_1, model.layer_2]:
-        dw, db = grad_tape.gradient(l, [m.w, m.b])
-        jitter_tensors = [tf.linalg.normalize(tf.random.normal(_d.shape))[0] for _d in [dw, db]]
-        scaled_jitter_tensors = [tf.math.multiply(_jt, l*t) for _jt in jitter_tensors]
-        m.w.assign_sub(learning_curve(learning_rate) * (dw + scaled_jitter_tensors[0]))
-        m.b.assign_sub(learning_curve(learning_rate) * (db + scaled_jitter_tensors[1]))
+    for ly in model.layers:
+        dw, db = grad_tape.gradient(loss, [ly.w, ly.b])
+        if jitter:
+            jitter_tensors = [tf.linalg.normalize(tf.random.normal(_d.shape))[0] for _d in [dw, db]]
+            scaled_jitter_tensors = [tf.math.multiply(_jt, loss*t) for _jt in jitter_tensors]
+            ly.w.assign_sub(learning_curve(learning_rate) * (dw + scaled_jitter_tensors[0]))
+            ly.b.assign_sub(learning_curve(learning_rate) * (db + scaled_jitter_tensors[1]))
+        else:
+            ly.w.assign_sub(learning_curve(learning_rate) * dw)
+            ly.b.assign_sub(learning_curve(learning_rate) * db)
         
     del grad_tape
-    return l
+    return loss
 
 def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float=0, delta_time: float=1) -> None:
-    for _ in range(10):
-        print('PASS {}'.format(_))
+    for p in range(5):
+        print('PASS {}'.format(p))
         for e in range(len(data)):
             _loss = train(model_wrapper, data[e], 1) # t=1 just uses loss scaling on jitter
             print('\nEPOCH {}:'.format(e))
