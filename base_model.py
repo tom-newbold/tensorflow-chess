@@ -108,7 +108,7 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
         # l = basic_loss(tf.cast(target_t, tf.float32), model_out[0])
         loss = composite_loss(0.8, tf.cast(target_t, tf.float32), model_out[0], context['player'], context['fen'], model_out[1], False)
 
-    for ly in model.layers:
+    for ly in model.layers[::-1]:
         dw, db = grad_tape.gradient(loss, [ly.w, ly.b])
         if jitter:
             jitter_tensors = [tf.linalg.normalize(tf.random.normal(_d.shape))[0] for _d in [dw, db]]
