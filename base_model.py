@@ -47,7 +47,7 @@ class ThreeLayerModel(SuperModel):
 
 class ModelWrapper:
     def __init__(self):
-        self.model_instance = TwoLayerModel(in_nodes=65, out_nodes=128, name='model_instanace')
+        self.model_instance = ThreeLayerModel(in_nodes=65, out_nodes=128, name='model_instanace')
 
     def __call__(self, fen: str) -> list[tf.Tensor, str]:
         position_ten, player = tenconv.fen_to_tensor(fen)
@@ -126,7 +126,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float
     for p in range(5):
         for e in range(len(data)):
             _loss = train(model_wrapper, data[e], tf.math.exp(-t).numpy()) # t=1 just uses loss scaling on jitter
-            print('PASS {0} - EPOCH {1}:'.format(p, e))
+            print('PASS {0} - EPOCH {1}:'.format(p+1, e+1))
             t += delta_time
     
     ''' # Test Loop
