@@ -93,11 +93,13 @@ def basic_loss(target_tensor: tf.Tensor, output_tensor: tf.Tensor) -> float:
 def learning_curve(x: float) -> float:
     return x
 
-def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int]], t: float, learning_rate: float=0.5, jitter: bool=True) -> float:
+def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, int], float], t: float, max_learning_rate: float=0.5, jitter: bool=True) -> float:
     #print('jitter scale: '+str(t))
     model = model_wrapper.model_instance
     #print(context)
     target_t = tenconv.lan_to_tensor(context['following_move'], context['player'])
+
+    learning_rate = max_learning_rate * learning_curve(context['game_time'])
 
     with tf.GradientTape(persistent=True) as grad_tape:
         model_out = model_wrapper(context['fen'])
@@ -112,11 +114,11 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
         if jitter:
             jitter_tensors = [tf.linalg.normalize(tf.random.normal(_d.shape))[0] for _d in [dw, db]]
             scaled_jitter_tensors = [tf.math.multiply(_jt, loss*t) for _jt in jitter_tensors]
-            ly.w.assign_sub(learning_curve(learning_rate) * (dw + scaled_jitter_tensors[0]))
-            ly.b.assign_sub(learning_curve(learning_rate) * (db + scaled_jitter_tensors[1]))
+            ly.w.assign_sub(learning_rate * (dw + scaled_jitter_tensors[0]))
+            ly.b.assign_sub(learning_rate * (db + scaled_jitter_tensors[1]))
         else:
-            ly.w.assign_sub(learning_curve(learning_rate) * dw)
-            ly.b.assign_sub(learning_curve(learning_rate) * db)
+            ly.w.assign_sub(learning_rate * dw)
+            ly.b.assign_sub(learning_rate * db)
         
     del grad_tape
     return loss
