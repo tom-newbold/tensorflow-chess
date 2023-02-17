@@ -127,7 +127,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float
     t = inital_time
     for p in range(5):
         for e in range(len(data)):
-            _loss = train(model_wrapper, data[e], tf.math.exp(-t).numpy()) # t=1 just uses loss scaling on jitter
+            _loss = train(model_wrapper, data[e], tf.math.exp(-t).numpy(), 0.75) # t=1 just uses loss scaling on jitter
             print('PASS {0} - EPOCH {1}:'.format(p+1, e+1))
             t += delta_time
     
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     
     #train_loop(model_wrap, [], 0, 0.05)
     data = json.load(open('bin\\out.json','r'))['data_points']
-    train_loop(model_wrap, data[:100], delta_time=0.009)
+    train_loop(model_wrap, data[-100:], delta_time=0.009)
     # ln( final scaling ) / loop count ; 4.6/500 ~ 0.009
 
     while True:
