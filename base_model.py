@@ -123,11 +123,15 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
     del grad_tape
     return loss
 
+from random import shuffle
+
 def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float=0.0, delta_time: float=1.0) -> None:
     t = inital_time
     for p in range(10):
+        sample = [*range(len(data))]
+        shuffle(sample)
         for e in range(len(data)):
-            _loss = train(model_wrapper, data[e], tf.math.exp(-t).numpy(), 1) # t=1 just uses loss scaling on jitter
+            _loss = train(model_wrapper, data[sample[e]], tf.math.exp(-t).numpy(), 1) # t=1 just uses loss scaling on jitter
             print('PASS {0} - EPOCH {1}:'.format(p+1, e+1))
             t += delta_time
     
@@ -162,6 +166,10 @@ if __name__ == '__main__':
     data = json.load(open('bin\\out.json','r'))['data_points']
     train_loop(model_wrap, data[-200:], delta_time=0.009)
     # ln( final scaling ) / loop count ; 4.6/500 ~ 0.009
+
+    for layer in model_wrap.model_instance.layers:
+        print(layer.w)
+        print(layer.b)
 
     while True:
         fen = input('fen string:')
