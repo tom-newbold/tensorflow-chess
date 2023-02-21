@@ -50,8 +50,8 @@ class ModelWrapper:
         self.model_instance = ThreeLayerModel(in_nodes=65, out_nodes=128, name='model_instanace')
 
     def __call__(self, fen: str) -> list[tf.Tensor, str]:
-        position_ten, player = tenconv.fen_to_tensor(fen)
-        row_tensor = tf.reshape(position_ten, [1, 64])
+        position_fen, player = tenconv.fen_to_tensor(fen)
+        row_tensor = tf.reshape(position_fen, [1, 64])
         player_tensor = tf.cast(tf.constant([[player]]), dtype=tf.float32)
         model_out = self.model_instance(tf.concat([row_tensor, player_tensor], 1))
         slices = [model_out[0][0:64], model_out[0][64:128]]
@@ -125,9 +125,9 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
 
 def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float=0.0, delta_time: float=1.0) -> None:
     t = inital_time
-    for p in range(5):
+    for p in range(10):
         for e in range(len(data)):
-            _loss = train(model_wrapper, data[e], tf.math.exp(-t).numpy(), 0.75) # t=1 just uses loss scaling on jitter
+            _loss = train(model_wrapper, data[e], tf.math.exp(-t).numpy(), 1) # t=1 just uses loss scaling on jitter
             print('PASS {0} - EPOCH {1}:'.format(p+1, e+1))
             t += delta_time
     
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     
     #train_loop(model_wrap, [], 0, 0.05)
     data = json.load(open('bin\\out.json','r'))['data_points']
-    train_loop(model_wrap, data[-100:], delta_time=0.009)
+    train_loop(model_wrap, data[-200:], delta_time=0.009)
     # ln( final scaling ) / loop count ; 4.6/500 ~ 0.009
 
     while True:
