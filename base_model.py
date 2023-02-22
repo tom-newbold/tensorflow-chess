@@ -124,16 +124,23 @@ def train(model_wrapper: ModelWrapper, context: dict[int, str, str, dict[str, in
     return loss
 
 from random import shuffle
+import matplotlib.pyplot as plt
 
-def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float=0.0, delta_time: float=1.0) -> None:
+def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float=0.0, delta_time: float=1.0, passes: int=10) -> None:
     t = inital_time
-    for p in range(10):
-        sample = [*range(len(data))]
+    data_point_count = len(data)
+    loss_array = np.zeros((passes*data_point_count))
+    for p in range(passes):
+        sample = [*range(data_point_count)]
         shuffle(sample)
-        for e in range(len(data)):
+        for e in range(data_point_count):
             _loss = train(model_wrapper, data[sample[e]], tf.math.exp(-t).numpy(), 1) # t=1 just uses loss scaling on jitter
             print('PASS {0} - EPOCH {1}:'.format(p+1, e+1))
+            loss_array[e+p*data_point_count] = _loss
             t += delta_time
+    
+    plt.plot(loss_array)
+    plt.show()
     
     ''' # Test Loop
     data = [{
@@ -150,7 +157,6 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float
     print(model_wrapper(data[0]['fen'])[0])
     '''
 
-
 if __name__ == '__main__':
     model_wrap = ModelWrapper()
     print('model initialised')
@@ -164,12 +170,16 @@ if __name__ == '__main__':
     
     #train_loop(model_wrap, [], 0, 0.05)
     data = json.load(open('bin\\out.json','r'))['data_points']
-    train_loop(model_wrap, data[-200:], delta_time=0.009)
+    train_loop(model_wrap, data[-200:], delta_time=0.009, passes=10)
     # ln( final scaling ) / loop count ; 4.6/500 ~ 0.009
 
     for layer in model_wrap.model_instance.layers:
         print(layer.w)
         print(layer.b)
+
+    context = data[-201]
+    test_out = model_wrap(context['fen'])
+    print(composite_loss(0.8, tf.cast(tenconv.lan_to_tensor(context['following_move'], context['player']), tf.float32), test_out[0], context['player'], context['fen'], test_out[1], False))
 
     while True:
         fen = input('fen string:')
