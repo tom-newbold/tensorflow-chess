@@ -38,16 +38,18 @@ class ThreeLayerModel(SuperModel):
         self.layers.append(Layer(hidden_nodes, hidden_nodes))
         self.layers.append(Layer(hidden_nodes, out_nodes))
     
-    '''
-    def __call__(self, x: tf.Tensor) -> tf.Tensor:
-        y = self.layer_1(x)
-        z = self.layer_2(y)
-        return self.layer_3(z)
-    '''
+class FiveLayerModel(SuperModel):
+    def __init__(self, in_nodes: int=64, hidden_nodes: int=96, out_nodes: int=128, name: str=None):
+        super().__init__(name=name)
+        self.layers.append(Layer(in_nodes, hidden_nodes))
+        for i in range(3):
+            self.layers.append(Layer(hidden_nodes, hidden_nodes))
+        self.layers.append(Layer(hidden_nodes, out_nodes))
+    
 
 class ModelWrapper:
     def __init__(self):
-        self.model_instance = ThreeLayerModel(in_nodes=65, out_nodes=128, name='model_instanace')
+        self.model_instance = FiveLayerModel(in_nodes=65, out_nodes=128, name='model_instanace')
 
     def __call__(self, fen: str) -> list[tf.Tensor, str]:
         position_fen, player = tenconv.fen_to_tensor(fen)
@@ -134,7 +136,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float
         sample = [*range(data_point_count)]
         shuffle(sample)
         for e in range(data_point_count):
-            _loss = train(model_wrapper, data[sample[e]], tf.math.exp(-t).numpy(), 1) # t=1 just uses loss scaling on jitter
+            _loss = train(model_wrapper, data[sample[e]], tf.math.exp(-t).numpy(), 1, jitter=False) # t=1 just uses loss scaling on jitter
             print('PASS {0} - EPOCH {1}:'.format(p+1, e+1))
             loss_array[e+p*data_point_count] = _loss
             t += delta_time
@@ -170,7 +172,7 @@ if __name__ == '__main__':
     
     #train_loop(model_wrap, [], 0, 0.05)
     data = json.load(open('bin\\out.json','r'))['data_points']
-    train_loop(model_wrap, data[-200:], delta_time=0.009, passes=10)
+    train_loop(model_wrap, data[-200:], delta_time=0.009, passes=5)
     # ln( final scaling ) / loop count ; 4.6/500 ~ 0.009
 
     for layer in model_wrap.model_instance.layers:
