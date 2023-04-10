@@ -48,8 +48,9 @@ class FiveLayerModel(SuperModel):
     
 
 class ModelWrapper:
-    def __init__(self):
-        self.model_instance = FiveLayerModel(in_nodes=65, out_nodes=128, name='model_instanace')
+    def __init__(self, load_model=None):
+        if load_model: self.model_instance = load_model
+        else: self.model_instance = FiveLayerModel(in_nodes=65, out_nodes=128, name='model_instanace')
 
     def __call__(self, fen: str) -> list[tf.Tensor, str]:
         position_fen, player = tenconv.fen_to_tensor(fen)
@@ -138,7 +139,7 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float
         for e in range(data_point_count):
             _loss = train(model_wrapper, data[sample[e]], tf.math.exp(-t).numpy(), 1, jitter=False) # t=1 just uses loss scaling on jitter
             print('PASS {0} - EPOCH {1}:'.format(p+1, e+1))
-            loss_array[e+p*data_point_count] = _loss
+            if p != 0: loss_array[e+p*data_point_count] = _loss # remove first pass?
             t += delta_time
     
     plt.plot(loss_array)
@@ -161,18 +162,20 @@ def train_loop(model_wrapper: ModelWrapper, data: list[dict], inital_time: float
 
 if __name__ == '__main__':
     model_wrap = ModelWrapper()
+    #while True:
+    #    i = input('load?')
+    #    if i.lower()=='y':
+    #        model_wrap.model_instance.load_weights('model-checkpoint') 
+    #    elif i.lower()=='n':
+    #        break
     print('model initialised')
     '''
     test_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-    out = model(test_fen) # should return opening when trained
-    print(out[1])
-    l = composite_loss(0.8, tenconv.lan_to_tensor('e2e4'), out[0], 0, test_fen, out[1])
-    print(l)
     '''
     
     #train_loop(model_wrap, [], 0, 0.05)
     data = json.load(open('bin\\out.json','r'))['data_points']
-    train_loop(model_wrap, data[-200:], delta_time=0.009, passes=5)
+    train_loop(model_wrap, data, delta_time=0.009, passes=5)# [-200:]
     # ln( final scaling ) / loop count ; 4.6/500 ~ 0.009
 
     for layer in model_wrap.model_instance.layers:
@@ -182,6 +185,8 @@ if __name__ == '__main__':
     context = data[-201]
     test_out = model_wrap(context['fen'])
     print(composite_loss(0.8, tf.cast(tenconv.lan_to_tensor(context['following_move'], context['player']), tf.float32), test_out[0], context['player'], context['fen'], test_out[1], False))
+
+    #model_wrap.model_instance.save_weights('model-checkpoint')
 
     while True:
         fen = input('fen string:')
